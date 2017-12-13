@@ -1,0 +1,15 @@
+-- This file is part of Storage Energistics
+-- Author: Nividica
+-- Created: 10/20/2017
+-- Description: Utility functions for entities
+-- -- Creates a unique ID for the entity
+-- -- This ID is made of the surface, name, and position of the entity
+-- -- This will return the same string so long as the entity remains stationary for the duration of the ID.
+-- -- It is only safe to use this with mobile entities(such as player) during a single event, while the entity can not move.
+-- function GenerateEntityID(entity)
+--   return entity.name .. ":" .. entity.surface.name .. ":" .. entity.position.x .. ":" .. entity.position.y
+-- end
+-- -- Returns true if both entities are the same
+-- function CompareEntities(e1, e2)
+--   return (e1.position.x == e2.position.x) and (e1.position.y == e2.position.y) and (e1.name == e2.name) and (e1.surface.name == e2.surface.name)
+-- end
