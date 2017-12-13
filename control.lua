@@ -51,7 +51,7 @@ SE.NodeHandlers.AddHandler((require "StorageNetwork/NodeHandlers/EnergyAcceptorN
 SE.NodeHandlers.AddHandler((require "StorageNetwork/NodeHandlers/InterfaceNode")(BaseHandler))
 SE.NodeHandlers.AddHandler((require "StorageNetwork/NodeHandlers/StorageNode")(BaseHandler))
 
--- Link with entities
+-- Link node handlers with entities
 local protoNames = SE.Constants.Names.Proto
 local handlerNames = SE.Constants.Names.NodeHandlers
 SE.NodeHandlers.AddEntityHandler(protoNames.Controller.Entity, handlerNames.Controller)
@@ -62,8 +62,12 @@ SE.NodeHandlers.AddEntityHandler(protoNames.RequesterChest.Entity, handlerNames.
 SE.NodeHandlers.AddEntityHandler(protoNames.InterfaceChest.Entity, handlerNames.Interface)
 SE.NodeHandlers.AddEntityHandler(protoNames.ProviderChest.Entity, handlerNames.Interface)
 
+-- Create the Gui handler
+SE.GuiHandler = (require "GameEvents/GuiHandler")()
+
 -- Create the game event manager
 SE.GameEventHandlers = (require "GameEvents/GameEventHandlers")()
+
 -- Register for events
 SE.GameEventHandlers.RegisterHandlers()
 

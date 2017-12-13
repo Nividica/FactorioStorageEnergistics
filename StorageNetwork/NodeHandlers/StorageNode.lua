@@ -10,51 +10,6 @@ return function(BaseHandler)
   }
   setmetatable(StorageNodeHandler, {__index = BaseHandler})
 
-  local function GetChestGUIRoot(player)
-    return player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
-  end
-
-  local function GetChestGUIFrame(root)
-    return root[SE.Constants.Names.Gui.StorageChestFrame]
-  end
-
-  -- Shows the selection GUI, attached to the root gui element
-  local function ShowChestGUI(node, root)
-    if (GetChestGUIFrame(root) ~= nil) then
-      -- GUI already shown
-      return
-    end
-    -- Add the frame
-    local frame =
-      root.add(
-      {
-        type = "frame",
-        name = SE.Constants.Names.Gui.StorageChestFrame,
-        caption = "Energistics chest" -- TODO: Make localized
-      }
-    )
-    frame.style.title_bottom_padding = 6
-
-    -- Add read only checkbox
-    frame.add(
-      {
-        type = "checkbox",
-        name = SE.Constants.Names.Gui.StorageChestReadOnlyCheckbox,
-        state = (node.ReadOnlyMode == true),
-        caption = "Read Only Mode", -- TODO: Make localized
-        tooltip = "Prevents the storage network, and only the storage network, from placing items in this chest." -- TODO: Make localized
-      }
-    )
-  end
-
-  -- Closes the selection GUI, attached to the root gui element
-  local function CloseChestGUI(root)
-    local frame = GetChestGUIFrame(root)
-    if (frame ~= nil) then
-      frame.destroy()
-    end
-  end
-
   -- Returns true if read only should be forced, based on the entity
   local function ForceReadOnly(node)
     return node.Entity.name == SE.Constants.Names.Proto.RequesterChest.Entity
@@ -63,28 +18,7 @@ return function(BaseHandler)
   -- Show the gui
   function StorageNodeHandler:OnPlayerOpenedNode(player)
     if (not ForceReadOnly(self)) then
-      ShowChestGUI(self, GetChestGUIRoot(player))
-    end
-  end
-
-  -- Close the gui
-  function StorageNodeHandler:OnPlayerClosedNode(player)
-    if (not ForceReadOnly(self)) then
-      CloseChestGUI(GetChestGUIRoot(player))
-    end
-  end
-
-  function StorageNodeHandler:OnPlayerChangedCheckboxElement(player, element)
-    -- Ensure the frame is present, and the correct box was clicked
-    if (GetChestGUIFrame(GetChestGUIRoot(player)) ~= nil and element.name == SE.Constants.Names.Gui.StorageChestReadOnlyCheckbox) then
-      if (element.state) then
-        self.ReadOnlyMode = true
-      else
-        -- Why nil? Micro-optimization.
-        -- Setting to false will cause the property to be serialized
-        -- Since false is the default mode, removing the property has the same effect
-        self.ReadOnlyMode = nil
-      end
+      return SE.GuiHandler.Guis.StorageNode
     end
   end
 

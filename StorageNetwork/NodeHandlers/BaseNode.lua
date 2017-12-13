@@ -111,29 +111,19 @@ return function()
   function BaseNodeHandler:OnLeaveNetwork(network)
   end
 
-  -- void OnPlayerOpenedNode(self,player)
+  -- GuiHandler OnPlayerOpenedNode(self,player)
   -- Called when a player has opened this node
   -- This will only be called if the entity this node represents does something when it is clicked.
+  -- Return a GUI handler to show that GUI
   function BaseNodeHandler:OnPlayerOpenedNode(player)
     --player.print("Node opened by " .. player.name)
+    return nil
   end
 
   -- void OnPlayerClosedNode(self,player)
   -- Called when this node was opened by a player, but the player has just closed it.
   function BaseNodeHandler:OnPlayerClosedNode(player)
     --player.print("Node closed by " .. player.name)
-  end
-
-  -- void OnPlayerChangedSelectionElement(self, player, LuaGuiElement)
-  -- Called when the player has changed a selection element for this node.
-  function BaseNodeHandler:OnPlayerChangedSelectionElement(player, element)
-    player.print("Unhandled selection changed " .. element.name .. ", " .. (element.elem_value or "Cleared"))
-  end
-
-  -- void OnPlayerChangedCheckboxElement(self, player, LuaGuiElement)
-  -- Called when the player clicks a checkbox in the nodes GUI.
-  function BaseNodeHandler:OnPlayerChangedCheckboxElement(player, element)
-    player.print("Unhandled checkbox changed! " .. element.name .. ", " .. tostring(element.state))
   end
 
   -- void OnPasteSettings(self,sourceEntity, player)

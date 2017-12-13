@@ -80,7 +80,14 @@ return function()
     InterfaceItemSelectionElement = "se_pick_item:",
     StorageChestFrame = "se_gui_chest_frame",
     StorageChestFrameRoot = "left",
-    StorageChestReadOnlyCheckbox = "se_mode_readonly"
+    StorageChestReadOnlyCheckbox = "se_mode_readonly",
+    ControllerFrame = "se_gui_controller",
+    ControllerFrameRoot = "left"
+  }
+
+  -- Control Names
+  Names.Controls = {
+    StorageNetworkGui = "toggle-storage-network-gui"
   }
 
   -- Node types

@@ -11,58 +11,6 @@ return function(BaseHandler)
   }
   setmetatable(InterfaceNodeHandler, {__index = BaseHandler})
 
-  -- Recalculates the requested amounts for the interface
-  local function RecalculateRequestedAmounts(node)
-    local items = {}
-    for _, itemName in pairs(node.RequestFilters) do
-      items[itemName] = (items[itemName] or 0) + SE.StackSizeCache[itemName]
-    end
-    node.RequestedItemAmounts = items
-  end
-  -- Shows the selection GUI, attached to the root gui element
-  local function ShowSelectionGUI(node, root)
-    -- Add the frame
-    local frame =
-      root.add(
-      {
-        type = "frame",
-        name = SE.Constants.Names.Gui.InterfaceFrame,
-        caption = "Energistics request" -- Make localized
-      }
-    )
-    frame.style.title_bottom_padding = 6
-
-    -- Create the inner body
-    local body =
-      frame.add(
-      {
-        type = "table",
-        name = "body",
-        colspan = 5
-      }
-    )
-
-    -- Add selection buttons
-    for idx = 1, 10 do
-      body.add(
-        {
-          type = "choose-elem-button",
-          name = SE.Constants.Names.Gui.InterfaceItemSelectionElement .. tostring(idx),
-          elem_type = "item",
-          item = node.RequestFilters[idx]
-        }
-      )
-    end
-  end
-
-  -- Closes the selection GUI, attached to the root gui element
-  local function CloseSelectionGUI(root)
-    local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
-    if (frame ~= nil) then
-      frame.destroy()
-    end
-  end
-
   -- Copies the filters from the source to the node
   local function CopyNodeFilters(node, sourceNode)
     -- Get the handler for the source node
@@ -208,25 +156,16 @@ return function(BaseHandler)
 
   -- Build and add the filter GUI to the player
   function InterfaceNodeHandler:OnPlayerOpenedNode(player)
-    ShowSelectionGUI(self, player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot])
+    return SE.GuiHandler.Guis.InterfaceNode
   end
 
-  -- Close the selection gui
-  function InterfaceNodeHandler:OnPlayerClosedNode(player)
-    CloseSelectionGUI(player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot])
-  end
-
-  -- Player changed a gui filter
-  function InterfaceNodeHandler:OnPlayerChangedSelectionElement(player, element)
-    -- Get the index
-    local index = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
-    --player.print("Thing changed! " .. index .. ", " .. (element.elem_value or "Cleared"))
-
-    -- Set the filter
-    self.RequestFilters[index] = element.elem_value
-
-    -- Recalc request amounts
-    RecalculateRequestedAmounts(self)
+  -- Recalculates the requested amounts for the interface
+  function InterfaceNodeHandler:RecalculateRequestedAmounts()
+    local items = {}
+    for _, itemName in pairs(self.RequestFilters) do
+      items[itemName] = (items[itemName] or 0) + SE.StackSizeCache[itemName]
+    end
+    self.RequestedItemAmounts = items
   end
 
   -- Settings pasted

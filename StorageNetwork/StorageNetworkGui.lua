@@ -1,0 +1,4 @@
+-- This file is part of Storage Energistics
+-- Author: Nividica
+-- Created: 2017-12-12
+-- Description: Manages the global UI for storage networks.

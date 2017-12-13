@@ -7,13 +7,14 @@ return function()
   local GameEventHandlers = {
     Setup = (require "GameEvents/SetupHandler")(),
     Entity = (require "GameEvents/EntityHandler")(),
-    Gui = (require "GameEvents/GuiHandler")()
+    Control = (require "GameEvents/ControlHandler")()
   }
 
   function GameEventHandlers.RegisterHandlers()
     GameEventHandlers.Setup.RegisterWithGame()
     GameEventHandlers.Entity.RegisterWithGame()
-    GameEventHandlers.Gui.RegisterWithGame()
+    GameEventHandlers.Control.RegisterWithGame()
+    SE.GuiHandler.RegisterWithGame()
     script.on_event(defines.events.on_tick, GameEventHandlers.OnFirstTick)
   end
 
@@ -30,7 +31,7 @@ return function()
 
   function GameEventHandlers.OnTick(event)
     SE.Networks.Tick()
-    GameEventHandlers.Gui.Tick()
+    SE.GuiHandler.Tick()
     SE.Logger.Tick()
   end
 
