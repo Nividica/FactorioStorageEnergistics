@@ -15,7 +15,7 @@ return function()
   -- Data is a table that contains data used by a specific gui. Data is retained
   -- accross all events, and can be used to store state information. However
   -- it is not retained across a save-load.
-  -- If called from the SE GuiHandler, will contain Node, and Handler
+  -- If called due to an entity with a node being clicked on, will contain the node and handler.
   function BaseGUI.OnShow(player, data)
   end
 
@@ -38,14 +38,21 @@ return function()
   -- Called when the player has changed a selection element for this node.
   -- Data is a table that contains data used by a specific gui. See OnShow for more details.
   function BaseGUI.OnPlayerChangedSelectionElement(player, element, data)
-    player.print("Unhandled selection changed " .. element.name .. ", " .. (element.elem_value or "Cleared"))
+    --player.print("Unhandled selection changed " .. element.name .. ", " .. (element.elem_value or "Cleared"))
   end
 
   -- void OnPlayerChangedCheckboxElement(Player, LuaGuiElement, Table)
   -- Called when the player clicks a checkbox in the nodes GUI.
   -- Data is a table that contains data used by a specific gui. See OnShow for more details.
   function BaseGUI.OnPlayerChangedCheckboxElement(player, element, data)
-    player.print("Unhandled checkbox changed! " .. element.name .. ", " .. tostring(element.state))
+    --player.print("Unhandled checkbox changed " .. element.name .. ", " .. tostring(element.state))
+  end
+
+  -- void OnPlayerChangedDropDown(Player, LuaGuiElement, Table)
+  -- Called when the player changes a dropdown.
+  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
+  function BaseGUI.OnPlayerChangedDropDown(player, element, data)
+    --player.print("Unhandled dropdown changed " .. element.name .. ", " .. tostring(element.selected_index))
   end
 
   return BaseGUI

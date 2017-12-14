@@ -99,6 +99,15 @@ return function()
     end
   end
 
+  -- Returns an array containing all network ids
+  function NetworksManager.GetNetworkIDs()
+    local ids = {}
+    for circuitID, _ in pairs(Networks) do
+      ids[#ids + 1] = circuitID
+    end
+    return ids
+  end
+
   -- Returns the network with the specified ID
   function NetworksManager.GetNetwork(ID)
     return Networks[ID]

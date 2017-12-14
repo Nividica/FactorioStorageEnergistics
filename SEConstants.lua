@@ -81,8 +81,9 @@ return function()
     StorageChestFrame = "se_gui_chest_frame",
     StorageChestFrameRoot = "left",
     StorageChestReadOnlyCheckbox = "se_mode_readonly",
-    ControllerFrame = "se_gui_controller",
-    ControllerFrameRoot = "left"
+    NetworkFrame = "se_gui_network_overview",
+    NetworkFrameRoot = "left",
+    NetworkDropdown = "se_pick_network"
   }
 
   -- Control Names
