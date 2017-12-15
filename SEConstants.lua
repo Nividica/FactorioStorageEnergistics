@@ -82,7 +82,7 @@ return function()
     StorageChestFrameRoot = "left",
     StorageChestReadOnlyCheckbox = "se_mode_readonly",
     NetworkFrame = "se_gui_network_overview",
-    NetworkFrameRoot = "left",
+    NetworkFrameRoot = "center",
     NetworkDropdown = "se_pick_network"
   }
 

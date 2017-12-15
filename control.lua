@@ -30,7 +30,7 @@ SE.Settings = (require "SESettings")()
 -- Create the logger
 SE.Logger = (require "Utils/Logger")()
 -- Log trace messages
-SE.Logger.EnableTrace = false
+SE.Logger.EnableTrace = true
 SE.Logger.EnableLogging = true
 
 -- Create the data store
