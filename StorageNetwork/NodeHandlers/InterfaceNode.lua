@@ -156,7 +156,7 @@ return function(BaseHandler)
 
   -- Build and add the filter GUI to the player
   function InterfaceNodeHandler:OnPlayerOpenedNode(player)
-    return SE.GuiHandler.Guis.InterfaceNode
+    return SE.GuiManager.Guis.InterfaceNode
   end
 
   -- Recalculates the requested amounts for the interface

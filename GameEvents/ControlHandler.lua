@@ -14,9 +14,9 @@ return function()
     -- Toggle
     ControlHandler.ShowingOverview = not ControlHandler.ShowingOverview
     if (ControlHandler.ShowingOverview) then
-      SE.GuiHandler.ShowGui(player, SE.GuiHandler.Guis.NetworkOverview, {})
+      SE.GuiManager.ShowGui(player, SE.GuiManager.Guis.NetworkOverview, {})
     else
-      SE.GuiHandler.CloseGui(player, SE.GuiHandler.Guis.NetworkOverview)
+      SE.GuiManager.CloseGui(player, SE.GuiManager.Guis.NetworkOverview)
     end
   end
 

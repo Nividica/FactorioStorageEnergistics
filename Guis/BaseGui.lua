@@ -22,7 +22,8 @@ return function()
   -- void OnClose(Player, Table)
   -- Closes the GUI
   -- Player is required
-  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
+  -- Data is a table that may contain data used by a specific gui. See OnShow for more details.
+  -- - It must be acceptable that this may be nil, and the GUI must still close.
   function BaseGUI.OnClose(player, data)
   end
 

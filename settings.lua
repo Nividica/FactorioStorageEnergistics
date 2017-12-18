@@ -18,7 +18,7 @@ data:extend(
       type = "int-setting",
       name = "storage_energistics-transfer_power_drain-per_item-in_watts",
       setting_type = "runtime-global",
-      default_value = 2000,
+      default_value = 4570,
       minimum_value = 1,
       order = "a-b"
     },

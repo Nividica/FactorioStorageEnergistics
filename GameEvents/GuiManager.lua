@@ -4,23 +4,24 @@
 -- Description: GUI related events
 
 return function()
-  local GuiHandler = {
+  local SEGuiManager = {
     Guis = {}
   }
 
   -- Add GUI's
-  GuiHandler.Guis.BaseGui = (require "Guis/BaseGui")()
-  GuiHandler.Guis.InterfaceNode = (require "Guis/InterfaceNode")(GuiHandler.Guis.BaseGui)
-  GuiHandler.Guis.StorageNode = (require "Guis/StorageNode")(GuiHandler.Guis.BaseGui)
-  GuiHandler.Guis.NetworkOverview = (require "Guis/NetworkOverview")(GuiHandler.Guis.BaseGui)
+  SEGuiManager.Guis.BaseGui = (require "Guis/BaseGui")()
+  SEGuiManager.Guis.InterfaceNode = (require "Guis/InterfaceNode")(SEGuiManager.Guis.BaseGui)
+  SEGuiManager.Guis.StorageNode = (require "Guis/StorageNode")(SEGuiManager.Guis.BaseGui)
+  SEGuiManager.Guis.NetworkOverview = (require "Guis/NetworkOverview")(SEGuiManager.Guis.BaseGui)
 
-  -- Map( PlayerIndex -> ( {GuiHandler, Node, Handler} or False ) )
+  -- Map( PlayerIndex -> ( {SEGuiManager, Node, Handler} or False ) )
   -- Tracks what nodes players have open, and each nodes data
   -- False is stored when the player has something open, but it is not a node
   local OpenedNodes = {}
 
-  -- Map( PlayerIndex -> Map( GuiHandler -> GuiData ) )
+  -- Map( PlayerIndex -> Map( SEGuiManager -> GuiData ) )
   -- Tracks what Guis players have open, and each Guis data
+  -- Note: GUI data is not saved between game save/loads
   local OpenedGuis = {}
 
   -- Called when the player has just opened an entity
@@ -45,8 +46,8 @@ return function()
     local guiHandler = handler.OnPlayerOpenedNode(node, player)
     if (guiHandler ~= nil) then
       -- Show the gui
-      nodeInfo.GuiHandler = guiHandler
-      GuiHandler.ShowGui(player, guiHandler, nodeInfo)
+      nodeInfo.SEGuiManager = guiHandler
+      SEGuiManager.ShowGui(player, guiHandler, nodeInfo)
     end
 
     return nodeInfo
@@ -58,8 +59,8 @@ return function()
     nodeInfo.Handler.OnPlayerClosedNode(nodeInfo.Node, player)
 
     -- Close the GUI
-    if (nodeInfo.GuiHandler ~= nil) then
-      GuiHandler.CloseGui(player, nodeInfo.GuiHandler)
+    if (nodeInfo.SEGuiManager ~= nil) then
+      SEGuiManager.CloseGui(player, nodeInfo.SEGuiManager)
     end
   end
 
@@ -120,7 +121,7 @@ return function()
     end
   end
 
-  function GuiHandler.ShowGui(player, guiHandler, data)
+  function SEGuiManager.ShowGui(player, guiHandler, data)
     -- Ensure there is a handler
     if (guiHandler == nil) then
       return
@@ -132,7 +133,7 @@ return function()
     -- Does the player already have this gui open?
     if (guiMap[guiHandler] ~= nil) then
       -- Close the GUI
-      GuiHandler.CloseGui(player, guiHandler)
+      SEGuiManager.CloseGui(player, guiHandler)
     end
 
     -- Ensure data is not nil
@@ -146,7 +147,7 @@ return function()
     guiHandler.OnShow(player, data)
   end
 
-  function GuiHandler.CloseGui(player, guiHandler)
+  function SEGuiManager.CloseGui(player, guiHandler)
     -- Ensure there is a handler
     if (guiHandler == nil) then
       return
@@ -173,7 +174,7 @@ return function()
 
   -- Called every game tick
   -- If there are any GUIs open, and those GUIs accept ticks, they will be ticked.
-  function GuiHandler.Tick()
+  function SEGuiManager.Tick()
     -- Get the list of players
     for playerIndex, player in pairs(game.players) do
       -- Check what the player has open
@@ -185,7 +186,7 @@ return function()
   end
 
   -- Called when a selection element has changed
-  function GuiHandler.OnElementChanged(event)
+  function SEGuiManager.OnElementChanged(event)
     -- Get the player
     local player = game.players[event.player_index]
 
@@ -202,7 +203,7 @@ return function()
   end
 
   -- Called when a checkbox changes
-  function GuiHandler.OnCheckboxChanged(event)
+  function SEGuiManager.OnCheckboxChanged(event)
     -- Get the player
     local player = game.players[event.player_index]
 
@@ -219,7 +220,7 @@ return function()
   end
 
   -- Called when a dropdown changes
-  function GuiHandler.OnDropDownChanged(event)
+  function SEGuiManager.OnDropDownChanged(event)
     -- Get the player
     local player = game.players[event.player_index]
 
@@ -236,11 +237,20 @@ return function()
   end
 
   -- Called to register the handler events
-  function GuiHandler.RegisterWithGame()
-    script.on_event(defines.events.on_gui_elem_changed, GuiHandler.OnElementChanged)
-    script.on_event(defines.events.on_gui_checked_state_changed, GuiHandler.OnCheckboxChanged)
-    script.on_event(defines.events.on_gui_selection_state_changed, GuiHandler.OnDropDownChanged)
+  function SEGuiManager.RegisterWithGame()
+    script.on_event(defines.events.on_gui_elem_changed, SEGuiManager.OnElementChanged)
+    script.on_event(defines.events.on_gui_checked_state_changed, SEGuiManager.OnCheckboxChanged)
+    script.on_event(defines.events.on_gui_selection_state_changed, SEGuiManager.OnDropDownChanged)
   end
 
-  return GuiHandler
+  -- Called when a player joins the game
+  -- Walk through all GUI's and ensure they are closed
+  -- as their data is not saved
+  function SEGuiManager.OnPlayerJoinedGame(player)
+    for _, guiHandler in pairs(SEGuiManager.Guis) do
+      guiHandler.OnClose(player, nil)
+    end
+  end
+
+  return SEGuiManager
 end

@@ -14,8 +14,9 @@ return function()
     GameEventHandlers.Setup.RegisterWithGame()
     GameEventHandlers.Entity.RegisterWithGame()
     GameEventHandlers.Control.RegisterWithGame()
-    SE.GuiHandler.RegisterWithGame()
+    SE.GuiManager.RegisterWithGame()
     script.on_event(defines.events.on_tick, GameEventHandlers.OnFirstTick)
+    script.on_event(defines.events.on_player_joined_game, GameEventHandlers.OnPlayerJoined)
   end
 
   function GameEventHandlers.OnFirstTick(event)
@@ -31,8 +32,13 @@ return function()
 
   function GameEventHandlers.OnTick(event)
     SE.Networks.Tick()
-    SE.GuiHandler.Tick()
+    SE.GuiManager.Tick()
     SE.Logger.Tick()
+  end
+
+  function GameEventHandlers.OnPlayerJoined(event)
+    local player = game.players[event.player_index]
+    SE.GuiManager.OnPlayerJoinedGame(player)
   end
 
   return GameEventHandlers

@@ -5,6 +5,7 @@
 
 return function()
   SESettings = {
+    -- TODO: Use config settings
     --settings.global["storage_energistics-power_drain-per_node-per_tick-in_watts"].value,
     NodeIdlePowerDrain = 15,
     --settings.global["storage_energistics-transfer_power_drain-per_item-in_watts"].value

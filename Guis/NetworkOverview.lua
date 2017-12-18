@@ -213,7 +213,10 @@ return function(BaseGUI)
     networkContents[SE.Constants.Strings.FreeSlots] = nil
 
     -- Update capacity progress bar
-    local capacityPercent = 1.0 - (freeSlots / totalSlots)
+    local capacityPercent = 0
+    if (totalSlots ~= nil and totalSlots > 0 and freeSlots ~= nil) then
+      capacityPercent = 1.0 - (freeSlots / totalSlots)
+    end
     guiData.FrameData.Capacity.value = capacityPercent
     guiData.FrameData.Capacity.tooltip = "Network is at " .. (math.floor(capacityPercent * 1000) / 10) .. "% type capacity"
 
@@ -228,8 +231,25 @@ return function(BaseGUI)
     local ddList = {}
     if (#guiData.NetworkIDs > 0) then
       -- Build dropdown list
-      for _, networkID in ipairs(guiData.NetworkIDs) do
-        ddList[#ddList + 1] = "Network #" .. tostring(networkID)
+      local idx = #guiData.NetworkIDs
+      while idx > 0 do
+        -- Get the next network ID
+        local networkID = guiData.NetworkIDs[idx]
+
+        -- Get the network
+        local network = SE.Networks.GetNetwork(networkID)
+
+        -- Ensure there are non-controller devices on the network
+        if SE.NetworkHandler.EmptyEmptyExceptControllers(network) then
+          -- Remove the empty network
+          table.remove(guiData.NetworkIDs, idx)
+        else
+          -- Add to the dropdown list
+          ddList[#ddList + 1] = "Network #" .. tostring(networkID)
+        end
+
+        -- Decrement index
+        idx = idx - 1
       end
       -- Assign dropdown list
       guiData.FrameData.NetworkDropDown.items = ddList
@@ -339,8 +359,8 @@ return function(BaseGUI)
 
     -- Has frame?
     if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
-      -- Already open
-      return
+      -- Already open, close first
+      NetworkOverviewGUI.OnClose(player, data)
     end
 
     -- Build the frame
@@ -366,6 +386,10 @@ return function(BaseGUI)
   end
 
   function NetworkOverviewGUI.OnTick(player, data)
+    if (data == nil or data.TickCount == nil) then
+      -- Invalid data, close the gui
+      NetworkOverviewGUI.OnClose(player, nil)
+    end
     -- Increment tick count
     data.TickCount = data.TickCount + 1
 

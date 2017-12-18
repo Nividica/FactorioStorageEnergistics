@@ -66,7 +66,6 @@ return function()
 
   -- void GetContents(self,catalog)
   -- catalog: Map( item name -> count)
-  -- TODO: Is this needed?
   function BaseNodeHandler:GetContents(catalog)
   end
 

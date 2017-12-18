@@ -453,7 +453,6 @@ return function()
 
   -- Map( item name -> count) GetStorageContents()
   -- Returns all items in the network
-  -- TODO: Is this needed?
   function SENetwork:GetStorageContents()
     -- New tick?
     if (game.tick ~= self.LastStorageTick) then
@@ -470,7 +469,13 @@ return function()
   -- bool Empty()
   -- Returns true if there are no nodes on the network
   function SENetwork:Empty()
-    return next(self.ControllerNodes) == nil and next(self.PowerSourceNodes) == nil and next(self.StorageNodes) == nil and next(self.DeviceNodes) == nil
+    return next(self.ControllerNodes) == nil and SENetwork.EmptyEmptyExceptControllers(self)
+  end
+
+  -- bool EmptyExceptControllers()
+  -- Returns true if there are no nodes, except controllers, on the network
+  function SENetwork:EmptyEmptyExceptControllers()
+    return next(self.PowerSourceNodes) == nil and next(self.StorageNodes) == nil and next(self.DeviceNodes) == nil
   end
 
   return SENetwork

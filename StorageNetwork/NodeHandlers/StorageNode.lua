@@ -18,7 +18,7 @@ return function(BaseHandler)
   -- Show the gui
   function StorageNodeHandler:OnPlayerOpenedNode(player)
     if (not ForceReadOnly(self)) then
-      return SE.GuiHandler.Guis.StorageNode
+      return SE.GuiManager.Guis.StorageNode
     end
   end
 
