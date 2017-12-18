@@ -11,6 +11,9 @@ return function(BaseHandler)
   setmetatable(ControllerNode, {__index = BaseHandler})
 
   function ControllerNode.NewNode(entity)
+    -- Prevent player interaction with the Controller GUI
+    entity.operable = false
+
     return ControllerNode.EnsureStructure(BaseHandler.NewNode(entity))
   end
 

@@ -14,15 +14,16 @@ return function(BaseGUI)
   require "Utils/Strings"
 
   -- Alright, this sucks, but I have yet to find a better way
-  local function AddCountToSlot(parent, count)
+  -- to add the shadow to the count
+  local function AddCountToSlot(parent)
     local shadow_color = {r = 0.2, g = 0.2, b = 0.25}
     local vert_center = 14
     local label_style = "electric_usage_label_style"
     local font_style = "default-small-bold"
-    local countStr = NumberToStringWithSuffix(count)
+    local countStr = tostring(-1)
 
     -- Top-left shadow
-    local numLabel =
+    local tlShadow =
       parent.add(
       {
         type = "label",
@@ -30,13 +31,13 @@ return function(BaseGUI)
         style = label_style
       }
     )
-    numLabel.style.top_padding = vert_center - 1
-    numLabel.style.left_padding = 0
-    numLabel.style.font = font_style
-    numLabel.style.font_color = shadow_color
+    tlShadow.style.top_padding = vert_center - 1
+    tlShadow.style.left_padding = 0
+    tlShadow.style.font = font_style
+    tlShadow.style.font_color = shadow_color
 
     -- Bottom-right shadow
-    numLabel =
+    local brShadow =
       parent.add(
       {
         type = "label",
@@ -44,13 +45,13 @@ return function(BaseGUI)
         style = label_style
       }
     )
-    numLabel.style.top_padding = vert_center + 1
-    numLabel.style.left_padding = 2
-    numLabel.style.font = font_style
-    numLabel.style.font_color = shadow_color
+    brShadow.style.top_padding = vert_center + 1
+    brShadow.style.left_padding = 2
+    brShadow.style.font = font_style
+    brShadow.style.font_color = shadow_color
 
     -- Foreground
-    numLabel =
+    local numLabel =
       parent.add(
       {
         type = "label",
@@ -62,17 +63,80 @@ return function(BaseGUI)
     numLabel.style.left_padding = 1
     numLabel.style.font = font_style
     numLabel.style.font_color = {r = 1, g = 1, b = 1}
+
+    return {TLS = tlShadow, BRS = brShadow, Label = numLabel}
+  end
+
+  -- ItemCell :: { Cell, Slot, CountLabels :: { TLS, BRS, Label }, Label }
+  local function NewItemCell(itemTable)
+    local cellWidth = 275
+
+    -- Create the item cell
+    local itemCell =
+      itemTable.add(
+      {
+        type = "flow",
+        tooltip = "<Warning: Unused Cell>"
+      }
+    )
+    itemCell.style.minimal_width = cellWidth
+    itemCell.style.maximal_width = cellWidth
+
+    -- Add the item slot
+    local slot =
+      itemCell.add(
+      {
+        type = "choose-elem-button",
+        elem_type = "item",
+        item = nil,
+        name = "slot",
+        enabled = false,
+        style = "se_slot_button_style"
+      }
+    )
+
+    -- Add count
+    local countLabels = AddCountToSlot(slot)
+
+    -- Add the label
+    local itemLabel =
+      itemCell.add(
+      {
+        type = "label",
+        name = "label",
+        caption = "",
+        style = "se_item_table_item_label"
+      }
+    )
+
+    return {Cell = itemCell, Slot = slot, CountLabels = countLabels, Label = itemLabel}
+  end
+
+  -- Update the tooltip, count, and icon to match the given item
+  local function UpdateItemCell(itemCell, item)
+    -- Get the item prototype
+    local itemPrototype = game.item_prototypes[item.ID]
+
+    -- Update tooltip
+    itemCell.Cell.tooltip = {"", NumberToStringWithThousands(item.Count) .. "x ", itemPrototype.localised_name}
+
+    -- Update the slot
+    itemCell.Slot.elem_value = itemPrototype.name
+
+    -- Update counts
+    local countStr = NumberToStringWithSuffix(item.Count)
+    itemCell.CountLabels.TLS.caption = countStr
+    itemCell.CountLabels.BRS.caption = countStr
+    itemCell.CountLabels.Label.caption = countStr
+
+    -- Update label
+    itemCell.Label.caption = itemPrototype.localised_name
   end
 
   -- Shows the items in the table
   -- Where items = Map( itemName => count )
-  local function DisplayItems(itemTable, items)
-    local cellWidth = 275
-
-    -- Clear the existing table
-    itemTable.clear()
-
-    -- Create intermediate table
+  local function DisplayItems(guiData, items)
+    -- Create intermediate table for sorting
     local indexedItems = {}
     for itemID, count in pairs(items) do
       indexedItems[#indexedItems + 1] = {ID = itemID, Count = count}
@@ -86,47 +150,49 @@ return function(BaseGUI)
       end
     )
 
-    -- Create slots
-    for _, item in ipairs(indexedItems) do
-      -- Get the prototype
-      local itemPrototype = game.item_prototypes[item.ID]
+    -- Ensure item cells has been added
+    guiData.ItemCells = guiData.ItemCells or {}
 
-      -- Add the cell
-      local itemCell =
-        itemTable.add(
-        {
-          type = "flow",
-          name = "item_cell_" .. itemPrototype.name,
-          tooltip = NumberToStringWithThousands(item.Count) .. "x " .. itemPrototype.name
-        }
-      )
-      itemCell.style.minimal_width = cellWidth
-      itemCell.style.maximal_width = cellWidth
+    -- Get new and old number of cells
+    local newCellCount = #indexedItems
+    local oldCellCount = #guiData.ItemCells
 
-      -- Add the item slot
-      local slot =
-        itemCell.add(
-        {
-          type = "choose-elem-button",
-          elem_type = "item",
-          item = itemPrototype.name,
-          enabled = false,
-          style = "se_slot_button_style"
-        }
-      )
+    -- Update existing cells
+    local cellIndex = 1
+    while cellIndex <= newCellCount do
+      local itemCell = nil
+      if cellIndex <= oldCellCount then
+        -- Get the existing cell
+        itemCell = guiData.ItemCells[cellIndex]
+      else
+        -- Create a new cell
+        itemCell = NewItemCell(guiData.FrameData.ItemTable)
+        guiData.ItemCells[#guiData.ItemCells + 1] = itemCell
+      end
 
-      -- Add count
-      AddCountToSlot(slot, item.Count)
+      -- Get the item
+      local item = indexedItems[cellIndex]
 
-      -- Add the label
-      local itemLabel =
-        itemCell.add(
-        {
-          type = "label",
-          caption = itemPrototype.localised_name,
-          style = "se_item_table_item_label"
-        }
-      )
+      -- Update the item cell
+      UpdateItemCell(itemCell, item)
+
+      -- Move to next cell
+      cellIndex = cellIndex + 1
+    end
+
+    -- Are there any unused cells?
+    while cellIndex <= oldCellCount do
+      -- Get the last cell
+      local itemCell = guiData.ItemCells[#guiData.ItemCells]
+
+      -- Destroy it
+      itemCell.Cell.destroy()
+
+      -- Remove from cells
+      guiData.ItemCells[#guiData.ItemCells] = nil
+
+      -- Increment index
+      cellIndex = cellIndex + 1
     end
   end
 
@@ -138,11 +204,20 @@ return function(BaseGUI)
     -- Query the network for the items
     local networkContents = SE.NetworkHandler.GetStorageContents(network)
 
-    -- Clear totals TODO: Use totals
+    -- Extract capacity amounts
+    local totalSlots = networkContents[SE.Constants.Strings.TotalSlots]
+    local freeSlots = networkContents[SE.Constants.Strings.FreeSlots]
+
+    -- Remove capacity amounts from item list
     networkContents[SE.Constants.Strings.TotalSlots] = nil
     networkContents[SE.Constants.Strings.FreeSlots] = nil
 
-    DisplayItems(guiData.FrameData.ItemTable, networkContents)
+    -- Update capacity progress bar
+    local capacityPercent = 1.0 - (freeSlots / totalSlots)
+    guiData.FrameData.Capacity.value = capacityPercent
+    guiData.FrameData.Capacity.tooltip = "Network is at " .. (math.floor(capacityPercent * 1000) / 10) .. "% type capacity"
+
+    DisplayItems(guiData, networkContents)
   end
 
   -- Sets the networks in the dropdown
@@ -168,6 +243,7 @@ return function(BaseGUI)
   -- Returns FrameData {
   -- ItemTable
   -- NetworkDropDown
+  -- Capacity
   -- }
   local function BuildFrame(root)
     local width = 600
@@ -217,6 +293,19 @@ return function(BaseGUI)
       }
     )
 
+    -- Add the progress bar
+    local pgbWidth = width - 20
+    local progBar =
+      header.add(
+      {
+        type = "progressbar",
+        size = pgbWidth,
+        value = 0,
+        tooltip = ""
+      }
+    )
+    progBar.style.minimal_width = pgbWidth
+
     -- Add scroll pane
     local scrollWrapper =
       contents.add(
@@ -241,7 +330,7 @@ return function(BaseGUI)
       }
     )
 
-    return {ItemTable = itemTable, NetworkDropDown = networkDropDown}
+    return {ItemTable = itemTable, NetworkDropDown = networkDropDown, Capacity = progBar}
   end
 
   function NetworkOverviewGUI.OnShow(player, data)
@@ -286,7 +375,6 @@ return function(BaseGUI)
     end
     data.TickCount = 0
 
-    player.print("NetworkOverview Ticked")
     LoadNetworkContents(data)
   end
 
