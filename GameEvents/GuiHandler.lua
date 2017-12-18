@@ -108,7 +108,7 @@ return function()
 
   local function TickGuis(player)
     -- Get the map for this player
-    local guiMap = OpenedGuis[player]
+    local guiMap = OpenedGuis[player.index]
     if (guiMap ~= nil) then
       -- Check each open gui
       for guiHandler, guiData in pairs(guiMap) do

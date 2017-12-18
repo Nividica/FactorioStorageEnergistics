@@ -9,7 +9,13 @@ local Billion = Thousand * Million
 local Trillion = Thousand * Billion
 local Quadrillion = Thousand * Trillion
 
-function NumberToHumanString(num)
+-- Returns a number with a unit suffix
+-- Will show one non-zero decimal. Does not round.
+-- 1000 = 1k
+-- 1000000 = 1m
+-- 1200 = 1.2k
+-- 1299 = 1.2k
+function NumberToStringWithSuffix(num)
   -- No suffix
   if (num < Thousand) then
     return tostring(num)
@@ -41,4 +47,17 @@ function NumberToHumanString(num)
   end
 
   return tostring(num) .. suffix
+end
+
+-- Returns a number with comma separated thousands
+-- Modified from http://lua-users.org/wiki/FormattingNumbers , 2017-12-17
+function NumberToStringWithThousands(num)
+  local formatted = tostring(num)
+  while true do
+    formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2")
+    if (k == 0) then
+      break
+    end
+  end
+  return formatted
 end

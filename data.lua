@@ -15,7 +15,9 @@ require "Prototypes/Controls"
 --require "Prototypes/Event"
 
 -- Move to style file
-data.raw["gui-style"]["default"]["se_slot_button_style"] = {
+local guiStyles = data.raw["gui-style"]["default"]
+
+guiStyles["se_slot_button_style"] = {
   type = "button_style",
   parent = "button_style",
   scalable = false,
@@ -55,4 +57,10 @@ data.raw["gui-style"]["default"]["se_slot_button_style"] = {
     }
   },
   pie_progress_color = {r = 0.98, g = 0.66, b = 0.22, a = 0.5}
+}
+
+guiStyles["se_item_table_item_label"] = {
+  type = "label_style",
+  parent = "label_style",
+  font = "default-semibold"
 }

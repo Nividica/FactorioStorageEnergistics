@@ -6,11 +6,12 @@
 -- Dropdown listing all networks, ID = circuit network id
 return function(BaseGUI)
   local NetworkOverviewGUI = {
-    NeedsTicks = true
+    NeedsTicks = true,
+    TicksBetweenUpdates = 60 * 5
   }
   setmetatable(NetworkOverviewGUI, {__index = BaseGUI})
 
-  require "Utils/Math"
+  require "Utils/Strings"
 
   -- Alright, this sucks, but I have yet to find a better way
   local function AddCountToSlot(parent, count)
@@ -18,7 +19,7 @@ return function(BaseGUI)
     local vert_center = 14
     local label_style = "electric_usage_label_style"
     local font_style = "default-small-bold"
-    local countStr = NumberToHumanString(count)
+    local countStr = NumberToStringWithSuffix(count)
 
     -- Top-left shadow
     local numLabel =
@@ -66,19 +67,41 @@ return function(BaseGUI)
   -- Shows the items in the table
   -- Where items = Map( itemName => count )
   local function DisplayItems(itemTable, items)
+    local cellWidth = 275
+
     -- Clear the existing table
     itemTable.clear()
 
-    -- Create slots
+    -- Create intermediate table
+    local indexedItems = {}
     for itemID, count in pairs(items) do
+      indexedItems[#indexedItems + 1] = {ID = itemID, Count = count}
+    end
+
+    -- Sort the items
+    table.sort(
+      indexedItems,
+      function(a, b)
+        return a.Count > b.Count
+      end
+    )
+
+    -- Create slots
+    for _, item in ipairs(indexedItems) do
+      -- Get the prototype
+      local itemPrototype = game.item_prototypes[item.ID]
+
       -- Add the cell
       local itemCell =
         itemTable.add(
         {
           type = "flow",
-          name = "item_cell_" .. tostring(itemID)
+          name = "item_cell_" .. itemPrototype.name,
+          tooltip = NumberToStringWithThousands(item.Count) .. "x " .. itemPrototype.name
         }
       )
+      itemCell.style.minimal_width = cellWidth
+      itemCell.style.maximal_width = cellWidth
 
       -- Add the item slot
       local slot =
@@ -86,21 +109,22 @@ return function(BaseGUI)
         {
           type = "choose-elem-button",
           elem_type = "item",
-          item = itemID,
+          item = itemPrototype.name,
           enabled = false,
           style = "se_slot_button_style"
         }
       )
 
       -- Add count
-      AddCountToSlot(slot, count)
+      AddCountToSlot(slot, item.Count)
 
       -- Add the label
-      itemCell.add(
+      local itemLabel =
+        itemCell.add(
         {
           type = "label",
-          caption = game.item_prototypes[itemID].localised_name,
-          style = "description_label_style"
+          caption = itemPrototype.localised_name,
+          style = "se_item_table_item_label"
         }
       )
     end
@@ -146,6 +170,9 @@ return function(BaseGUI)
   -- NetworkDropDown
   -- }
   local function BuildFrame(root)
+    local width = 600
+    local height = 450
+
     -- Add the frame
     local frame =
       root.add(
@@ -155,8 +182,7 @@ return function(BaseGUI)
         caption = "Storage Network" -- TODO: Make localized
       }
     )
-    frame.style.title_bottom_padding = 6
-    frame.style.minimal_width = 540
+    frame.style.title_bottom_padding = 10
 
     -- Add the contents table
     local contents =
@@ -177,8 +203,9 @@ return function(BaseGUI)
         colspan = 1
       }
     )
-    header.style.column_alignments[1] = "top-right"
-    header.style.bottom_padding = 20
+    header.style.minimal_width = width
+    header.style.bottom_padding = 10
+    header.style.column_alignments[1] = "top-right" -- Seems to have no effect
 
     -- Add dropdown to header
     local networkDropDown =
@@ -198,7 +225,11 @@ return function(BaseGUI)
         name = "scroll_wrapper"
       }
     )
-    scrollWrapper.style.maximal_height = 570
+    scrollWrapper.vertical_scroll_policy = "always"
+    scrollWrapper.style.minimal_width = width
+    scrollWrapper.style.maximal_width = width
+    scrollWrapper.style.minimal_height = height
+    scrollWrapper.style.maximal_height = height
 
     -- Add item table
     local itemTable =
@@ -209,8 +240,6 @@ return function(BaseGUI)
         colspan = 2
       }
     )
-    itemTable.style.horizontal_spacing = 140
-    itemTable.style.right_padding = 90
 
     return {ItemTable = itemTable, NetworkDropDown = networkDropDown}
   end
@@ -230,6 +259,9 @@ return function(BaseGUI)
 
     -- Build dropdown list
     UpdateDropdownNetworks(data)
+
+    -- Add tick info
+    data.TickCount = 0
   end
 
   function NetworkOverviewGUI.OnClose(player, data)
@@ -242,6 +274,20 @@ return function(BaseGUI)
 
   function NetworkOverviewGUI.OnPlayerChangedDropDown(player, element, data)
     LoadNetworkContents(data, data.NetworkIDs[element.selected_index])
+  end
+
+  function NetworkOverviewGUI.OnTick(player, data)
+    -- Increment tick count
+    data.TickCount = data.TickCount + 1
+
+    -- Skip this tick?
+    if (data.TickCount < NetworkOverviewGUI.TicksBetweenUpdates) then
+      return
+    end
+    data.TickCount = 0
+
+    player.print("NetworkOverview Ticked")
+    LoadNetworkContents(data)
   end
 
   return NetworkOverviewGUI
