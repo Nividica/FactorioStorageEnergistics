@@ -7,9 +7,9 @@ return function(BaseGUI)
   local InterfaceNodeGUI = {}
   setmetatable(InterfaceNodeGUI, {__index = BaseGUI})
 
-  function InterfaceNodeGUI.OnShow(player, data)
+  function InterfaceNodeGUI:OnShow(player)
     -- Get the network node
-    local node = data.Node
+    local node = self.Node
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
@@ -55,7 +55,7 @@ return function(BaseGUI)
     end
   end
 
-  function InterfaceNodeGUI.OnClose(player, data)
+  function InterfaceNodeGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
     if (frame ~= nil) then
@@ -64,19 +64,15 @@ return function(BaseGUI)
   end
 
   -- Player changed a gui filter
-  function InterfaceNodeGUI.OnPlayerChangedSelectionElement(player, element, data)
-    -- Get the handler and node
-    local handler = data.Handler
-    local node = data.Node
-
+  function InterfaceNodeGUI:OnPlayerChangedSelectionElement(player, element)
     -- Get the index of the changed element
     local index = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
 
     -- Set the filter
-    node.RequestFilters[index] = element.elem_value
+    self.Node.RequestFilters[index] = element.elem_value
 
     -- Recalc request amounts
-    handler.RecalculateRequestedAmounts(node)
+    self.Handler.RecalculateRequestedAmounts(self.Node)
   end
 
   return InterfaceNodeGUI

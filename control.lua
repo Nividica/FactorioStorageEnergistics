@@ -62,8 +62,8 @@ SE.NodeHandlers.AddEntityHandler(protoNames.RequesterChest.Entity, handlerNames.
 SE.NodeHandlers.AddEntityHandler(protoNames.InterfaceChest.Entity, handlerNames.Interface)
 SE.NodeHandlers.AddEntityHandler(protoNames.ProviderChest.Entity, handlerNames.Interface)
 
--- Create the Gui handler
-SE.GuiManager = (require "GameEvents/GuiManager")()
+-- Create the Gui manager
+SE.GuiManager = (require "Guis/GuiManager")()
 
 -- Create the game event manager
 SE.GameEventHandlers = (require "GameEvents/GameEventHandlers")()

@@ -19,7 +19,7 @@ return function()
   -- False is stored when the player has something open, but it is not a node
   local OpenedNodes = {}
 
-  -- Map( PlayerIndex -> Map( SEGuiManager -> GuiData ) )
+  -- Map( PlayerIndex -> Map( SEGuiManager -> guiObject ) )
   -- Tracks what Guis players have open, and each Guis data
   -- Note: GUI data is not saved between game save/loads
   local OpenedGuis = {}
@@ -112,16 +112,16 @@ return function()
     local guiMap = OpenedGuis[player.index]
     if (guiMap ~= nil) then
       -- Check each open gui
-      for guiHandler, guiData in pairs(guiMap) do
+      for guiHandler, guiObject in pairs(guiMap) do
         if (guiHandler.NeedsTicks) then
           -- Tick the gui
-          guiHandler.OnTick(player, guiData)
+          guiHandler.OnTick(guiObject, player)
         end
       end
     end
   end
 
-  function SEGuiManager.ShowGui(player, guiHandler, data)
+  function SEGuiManager.ShowGui(player, guiHandler, guiObject)
     -- Ensure there is a handler
     if (guiHandler == nil) then
       return
@@ -136,15 +136,15 @@ return function()
       SEGuiManager.CloseGui(player, guiHandler)
     end
 
-    -- Ensure data is not nil
-    data = data or {}
+    -- Ensure guiObject is not nil
+    guiObject = guiObject or {}
 
     -- Save the data
-    guiMap[guiHandler] = data
+    guiMap[guiHandler] = guiObject
     OpenedGuis[player.index] = guiMap
 
     -- Open the GUI
-    guiHandler.OnShow(player, data)
+    guiHandler.OnShow(guiObject, player)
   end
 
   function SEGuiManager.CloseGui(player, guiHandler)
@@ -160,13 +160,13 @@ return function()
     end
 
     -- Get the data
-    local guiData = guiMap[guiHandler]
-    if (guiData == nil) then
+    local guiObject = guiMap[guiHandler]
+    if (guiObject == nil) then
       return
     end
 
     -- Close the GUI
-    guiHandler.OnClose(player, guiData)
+    guiHandler.OnClose(guiObject, player)
 
     -- Clear the entry
     guiMap[guiHandler] = nil
@@ -196,9 +196,9 @@ return function()
       return
     end
 
-    for guiHandler, guiData in pairs(handlerMap) do
+    for guiHandler, guiObject in pairs(handlerMap) do
       -- Inform the GUI
-      guiHandler.OnPlayerChangedSelectionElement(player, event.element, guiData)
+      guiHandler.OnPlayerChangedSelectionElement(guiObject, player, event.element)
     end
   end
 
@@ -213,9 +213,9 @@ return function()
       return
     end
 
-    for guiHandler, guiData in pairs(handlerMap) do
+    for guiHandler, guiObject in pairs(handlerMap) do
       -- Inform the GUI
-      guiHandler.OnPlayerChangedCheckboxElement(player, event.element, guiData)
+      guiHandler.OnPlayerChangedCheckboxElement(guiObject, player, event.element)
     end
   end
 
@@ -230,9 +230,9 @@ return function()
       return
     end
 
-    for guiHandler, guiData in pairs(handlerMap) do
+    for guiHandler, guiObject in pairs(handlerMap) do
       -- Inform the GUI
-      guiHandler.OnPlayerChangedDropDown(player, event.element, guiData)
+      guiHandler.OnPlayerChangedDropDown(guiObject, player, event.element)
     end
   end
 
@@ -248,7 +248,7 @@ return function()
   -- as their data is not saved
   function SEGuiManager.OnPlayerJoinedGame(player)
     for _, guiHandler in pairs(SEGuiManager.Guis) do
-      guiHandler.OnClose(player, nil)
+      guiHandler.OnClose(nil, player)
     end
   end
 

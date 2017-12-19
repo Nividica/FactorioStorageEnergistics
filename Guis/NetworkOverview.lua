@@ -7,7 +7,7 @@
 return function(BaseGUI)
   local NetworkOverviewGUI = {
     NeedsTicks = true,
-    TicksBetweenUpdates = 60 * 5
+    TicksBetweenUpdates = 60.0 * 2.5
   }
   setmetatable(NetworkOverviewGUI, {__index = BaseGUI})
 
@@ -265,7 +265,7 @@ return function(BaseGUI)
   -- NetworkDropDown
   -- Capacity
   -- }
-  local function BuildFrame(root)
+  local function NewFrame(root)
     local width = 600
     local height = 450
 
@@ -353,27 +353,27 @@ return function(BaseGUI)
     return {ItemTable = itemTable, NetworkDropDown = networkDropDown, Capacity = progBar}
   end
 
-  function NetworkOverviewGUI.OnShow(player, data)
+  function NetworkOverviewGUI:OnShow(player)
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
 
     -- Has frame?
     if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
       -- Already open, close first
-      NetworkOverviewGUI.OnClose(player, data)
+      NetworkOverviewGUI.OnClose(self, player)
     end
 
     -- Build the frame
-    data.FrameData = BuildFrame(root)
+    self.FrameData = NewFrame(root)
 
     -- Build dropdown list
-    UpdateDropdownNetworks(data)
+    UpdateDropdownNetworks(self)
 
     -- Add tick info
-    data.TickCount = 0
+    self.TickCount = 0
   end
 
-  function NetworkOverviewGUI.OnClose(player, data)
+  function NetworkOverviewGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
     local frame = root[SE.Constants.Names.Gui.NetworkFrame]
     if (frame ~= nil) then
@@ -381,25 +381,25 @@ return function(BaseGUI)
     end
   end
 
-  function NetworkOverviewGUI.OnPlayerChangedDropDown(player, element, data)
-    LoadNetworkContents(data, data.NetworkIDs[element.selected_index])
+  function NetworkOverviewGUI:OnPlayerChangedDropDown(player, element)
+    LoadNetworkContents(self, self.NetworkIDs[element.selected_index])
   end
 
-  function NetworkOverviewGUI.OnTick(player, data)
-    if (data == nil or data.TickCount == nil) then
+  function NetworkOverviewGUI:OnTick(player)
+    if (self == nil or self.TickCount == nil) then
       -- Invalid data, close the gui
       NetworkOverviewGUI.OnClose(player, nil)
     end
     -- Increment tick count
-    data.TickCount = data.TickCount + 1
+    self.TickCount = self.TickCount + 1
 
     -- Skip this tick?
-    if (data.TickCount < NetworkOverviewGUI.TicksBetweenUpdates) then
+    if (self.TickCount < NetworkOverviewGUI.TicksBetweenUpdates) then
       return
     end
-    data.TickCount = 0
+    self.TickCount = 0
 
-    LoadNetworkContents(data)
+    LoadNetworkContents(self)
   end
 
   return NetworkOverviewGUI

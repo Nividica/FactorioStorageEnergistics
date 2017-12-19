@@ -9,51 +9,50 @@ return function()
     NeedsTicks = false
   }
 
-  -- void OnShow(Player, Table)
+  -- void OnShow(Self, Player)
   -- Shows the GUI
   -- Player is required
-  -- Data is a table that contains data used by a specific gui. Data is retained
+  -- Self is a table that contains data used by a specific gui. Data is retained
   -- accross all events, and can be used to store state information. However
   -- it is not retained across a save-load.
   -- If called due to an entity with a node being clicked on, will contain the node and handler.
-  function BaseGUI.OnShow(player, data)
+  function BaseGUI:OnShow(player)
   end
 
-  -- void OnClose(Player, Table)
+  -- void OnClose(Self, Player)
   -- Closes the GUI
   -- Player is required
-  -- Data is a table that may contain data used by a specific gui. See OnShow for more details.
+  -- Self is a table that may contain data used by a specific gui. See OnShow for more details.
   -- - It must be acceptable that this may be nil, and the GUI must still close.
-  function BaseGUI.OnClose(player, data)
+  function BaseGUI:OnClose(player)
   end
 
-  -- void OnTick(Player, Table)
+  -- void OnTick(Self, Player)
   -- Called if NeedsTicks is true, every game tick
   -- Player is required
-  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
-  function BaseGUI.OnTick(player, data)
-    player.print("Unhandled GUI tick")
+  -- Self is a table that contains data used by a specific gui. See OnShow for more details.
+  function BaseGUI:OnTick(player)
+    if (self ~= nil and self.NeedsTicks) then
+      player.print("Unhandled GUI tick")
+    end
   end
 
-  -- void OnPlayerChangedSelectionElement(Player, LuaGuiElement, data)
+  -- void OnPlayerChangedSelectionElement(Self, Player, LuaGuiElement)
   -- Called when the player has changed a selection element for this node.
-  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
-  function BaseGUI.OnPlayerChangedSelectionElement(player, element, data)
-    --player.print("Unhandled selection changed " .. element.name .. ", " .. (element.elem_value or "Cleared"))
+  -- Self is a table that contains data used by a specific gui. See OnShow for more details.
+  function BaseGUI:OnPlayerChangedSelectionElement(player, element)
   end
 
-  -- void OnPlayerChangedCheckboxElement(Player, LuaGuiElement, Table)
+  -- void OnPlayerChangedCheckboxElement(Self, LuaGuiElement, Table)
   -- Called when the player clicks a checkbox in the nodes GUI.
-  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
-  function BaseGUI.OnPlayerChangedCheckboxElement(player, element, data)
-    --player.print("Unhandled checkbox changed " .. element.name .. ", " .. tostring(element.state))
+  -- Self is a table that contains data used by a specific gui. See OnShow for more details.
+  function BaseGUI:OnPlayerChangedCheckboxElement(player, element)
   end
 
   -- void OnPlayerChangedDropDown(Player, LuaGuiElement, Table)
   -- Called when the player changes a dropdown.
-  -- Data is a table that contains data used by a specific gui. See OnShow for more details.
-  function BaseGUI.OnPlayerChangedDropDown(player, element, data)
-    --player.print("Unhandled dropdown changed " .. element.name .. ", " .. tostring(element.selected_index))
+  -- Self is a table that contains data used by a specific gui. See OnShow for more details.
+  function BaseGUI.OnPlayerChangedDropDown(player, element)
   end
 
   return BaseGUI
