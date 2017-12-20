@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/26/2017
+-- Created: 2017-10-26
 -- Description: Energy Acceptor node
 
 return function(BaseHandler)
@@ -10,7 +10,7 @@ return function(BaseHandler)
   }
   setmetatable(EnergyAcceptorNodeHandler, {__index = BaseHandler})
 
-  -- int ExtractPower(self,watts)
+  -- ExtractPower( Self, uint ) :: uint
   -- Called when the network needs power, and ProvidesPower is true.
   -- Return amount of power extracted.
   function EnergyAcceptorNodeHandler:ExtractPower(watts)
@@ -31,17 +31,19 @@ return function(BaseHandler)
     return extracted
   end
 
-  -- int StoredPower(self)
+  -- StoredPower( Self ) : uint
   -- Called to determine amount of power stored in the node.
   -- Return amount of power stored.
   function EnergyAcceptorNodeHandler:StoredPower()
     return self.Entity.energy
   end
 
+  -- @See BaseNode.NewNode
   function EnergyAcceptorNodeHandler.NewNode(entity)
     return EnergyAcceptorNodeHandler.EnsureStructure(BaseHandler.NewNode(entity))
   end
 
+  -- @See BaseNode:EnsureStructure
   function EnergyAcceptorNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
     self.HandlerName = EnergyAcceptorNodeHandler.HandlerName

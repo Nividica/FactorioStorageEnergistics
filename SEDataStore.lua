@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/26/2017
+-- Created: 2017-10-26
 -- Description: Persistance data
 -- Singleton
 

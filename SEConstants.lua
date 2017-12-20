@@ -22,6 +22,16 @@ return function()
   Strings.TotalSlots = "__totalslots__"
   Strings.FreeSlots = "__freeslots__"
 
+  Strings.Local = {}
+  Strings.Local.StorageNetwork = {"text.storage_energistics_storage_network"}
+  Strings.Local.ChestSettings = {"text.storage_energistics_chest_settings"}
+  Strings.Local.ChestMode = {"text.storage_energistics_chest_mode"}
+  Strings.Local.ChestMode_Tooltip = {"text.storage_energistics_chest_mode_tooltip"}
+  Strings.Local.InterfaceSettings = {"text.storage_energistics_interface_settings"}
+  Strings.Local.NetCap = {"text.storage_energistics_net_cap"}
+  Strings.Local.NetworkID = {"text.storage_energistics_network_id"}
+  Strings.Local.Close = {"text.storage_energistics_close"}
+
   ---- Paths
   Paths.Base = "__storage_energistics__/"
   Paths.GFX = Paths.Base .. "Graphics/"

@@ -61,3 +61,22 @@ function NumberToStringWithThousands(num)
   end
   return formatted
 end
+
+-- ConcatStringWithLocalized( ... ) :: LocalizedTable
+-- Concatinates items with localization tables
+function ConcatStringWithLocalized(...)
+  local concatTable = {}
+  for _, v in ipairs({...}) do
+    local vType = type(v)
+    concatTable[#concatTable + 1] = ""
+    if (vType == "table" or vType == "userdata") then
+      -- Assume localized table
+      concatTable[#concatTable + 1] = v
+    else
+      -- Add litteral entry
+      concatTable[#concatTable + 1] = tostring(v)
+    end
+  end
+
+  return concatTable
+end

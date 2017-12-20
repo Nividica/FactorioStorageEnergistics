@@ -10,11 +10,13 @@ return function(BaseHandler)
   }
   setmetatable(StorageNodeHandler, {__index = BaseHandler})
 
+  -- ForceReadOnly( Node ) :: bool
   -- Returns true if read only should be forced, based on the entity
   local function ForceReadOnly(node)
     return node.Entity.name == SE.Constants.Names.Proto.RequesterChest.Entity
   end
 
+  -- @See BaseNode:OnPlayerOpenedNode
   -- Show the gui
   function StorageNodeHandler:OnPlayerOpenedNode(player)
     if (not ForceReadOnly(self)) then
@@ -22,6 +24,7 @@ return function(BaseHandler)
     end
   end
 
+  -- @See BaseNode:InsertItems
   function StorageNodeHandler:InsertItems(stack, simulate)
     if (self.ReadOnlyMode) then
       return 0
@@ -34,6 +37,7 @@ return function(BaseHandler)
     return inserted
   end
 
+  -- @See BaseNode:ExtractItems
   function StorageNodeHandler:ExtractItems(stack, simulate)
     local inv = self.Entity.get_inventory(defines.inventory.chest)
     local removed = inv.remove(stack)
@@ -43,11 +47,13 @@ return function(BaseHandler)
     return removed
   end
 
+  -- @See BaseNode:GetItemCount
   function StorageNodeHandler:GetItemCount(itemName)
     local inv = self.Entity.get_inventory(defines.inventory.chest)
     return inv.get_item_count(itemName)
   end
 
+  -- @See BaseNode:OnPasteSettings
   function StorageNodeHandler:GetContents(catalog)
     local inv = self.Entity.get_inventory(defines.inventory.chest)
     -- Get total slot count
@@ -74,6 +80,7 @@ return function(BaseHandler)
     catalog[SE.Constants.Strings.FreeSlots] = (catalog[SE.Constants.Strings.FreeSlots] or 0) + freeSlots
   end
 
+  -- OnPasteSettings( Self,  LuaEntity, LuaPlayer ) :: void
   function StorageNodeHandler:OnPasteSettings(sourceEntity, player)
     -- Is this node forced read-only?
     if (ForceReadOnly(self)) then
@@ -91,10 +98,12 @@ return function(BaseHandler)
     end
   end
 
+  -- @See BaseNode.NewNode
   function StorageNodeHandler.NewNode(entity)
     return StorageNodeHandler.EnsureStructure(BaseHandler.NewNode(entity))
   end
 
+  -- @See BaseNode:EnsureStructure
   function StorageNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
     self.HandlerName = StorageNodeHandler.HandlerName

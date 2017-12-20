@@ -3,10 +3,12 @@
 -- Created: 2017-12-12
 -- Description:
 
+-- Constructs and returns the StorageNodeGUI object
 return function(BaseGUI)
   local StorageNodeGUI = {}
   setmetatable(StorageNodeGUI, {__index = BaseGUI})
 
+  -- @See BaseGUI:OnShow
   function StorageNodeGUI:OnShow(player)
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
@@ -15,7 +17,7 @@ return function(BaseGUI)
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
     if (frame ~= nil) then
       -- Already open
-      return
+      return false
     end
 
     -- Add the frame
@@ -24,7 +26,7 @@ return function(BaseGUI)
       {
         type = "frame",
         name = SE.Constants.Names.Gui.StorageChestFrame,
-        caption = "Energistics chest" -- TODO: Make localized
+        caption = SE.Constants.Strings.Local.ChestSettings
       }
     )
     frame.style.title_bottom_padding = 6
@@ -35,12 +37,15 @@ return function(BaseGUI)
         type = "checkbox",
         name = SE.Constants.Names.Gui.StorageChestReadOnlyCheckbox,
         state = (self.Node.ReadOnlyMode == true),
-        caption = "Read Only Mode", -- TODO: Make localized
-        tooltip = "Prevents the storage network, and only the storage network, from placing items in this chest." -- TODO: Make localized
+        caption = SE.Constants.Strings.Local.ChestMode,
+        tooltip = SE.Constants.Strings.Local.ChestMode_Tooltip
       }
     )
+
+    return true
   end
 
+  -- @See BaseGUI:OnClose
   function StorageNodeGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
@@ -49,6 +54,7 @@ return function(BaseGUI)
     end
   end
 
+  -- @See BaseGUI:OnPlayerChangedCheckboxElement
   function StorageNodeGUI:OnPlayerChangedCheckboxElement(player, element)
     local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]

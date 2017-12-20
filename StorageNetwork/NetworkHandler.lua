@@ -6,6 +6,7 @@
 return function()
   local SENetwork = {}
 
+  -- NewNetwork( Int, Int ) :: Network
   -- Creates a new SENetwork with the given ID and wire type.
   function SENetwork.NewNetwork(networkID, wireType)
     local network = {
@@ -25,7 +26,7 @@ return function()
     return network
   end
 
-  -- void RemoveNode(self,node,fireNodeEvents)
+  -- void AddNode( Self, Node, bool ) :: void
   -- Adds a node to the network
   -- node: Node to add
   -- fireNodeEvents: True to inform node that it is joining network
@@ -71,7 +72,7 @@ return function()
     end
   end
 
-  -- void RemoveNode(self,node,fireNodeEvents)
+  -- RemoveNode( Self, Node, bool ) :: void
   -- Removes a node from the network
   -- node: Node to remove
   -- fireNodeEvents: True to inform node that it is leaving network
@@ -114,14 +115,14 @@ return function()
     end
   end
 
-  -- Tick(self :: Network) :: void
+  -- Tick( Self ) :: void
   -- Called when the game ticks
   function SENetwork:Tick()
     -- Draw idle power
     self.HasPower = (self.IdlePowerDraw == 0) or SENetwork.ExtractPower(self, self.IdlePowerDraw)
   end
 
-  -- void NetworkTick(self)
+  -- NetworkTick( Self ) :: void
   -- Called when the network ticks
   function SENetwork:NetworkTick()
     if (not self.HasPower) then
@@ -145,7 +146,7 @@ return function()
     end
   end
 
-  -- bool CanExtractPower(network,request)
+  -- CanExtractPower( Network, PowerRequest ) :: bool
   -- request: PowerRequest
   -- Returns true if the request can be fully satisfied, false if not
   -- If the request can only be partially satisfied, you can check request.WattsRemaining
@@ -296,7 +297,7 @@ return function()
     return false
   end
 
-  -- void DoExtractPower(netMap)
+  -- DoExtractPower( PowerRequest ) :: void
   -- Extracts the requested amount of power from the nodes in the map.
   -- request: PowerRequest
   local function DoExtractPower(request)
@@ -305,7 +306,7 @@ return function()
     end
   end
 
-  -- PowerRequest NewPowerRequest(watts)
+  -- NewPowerRequest( uint ) :: PowerRequest
   -- Creates a new power request
   -- watts: Amount of power to request
   -- Returns: {
@@ -317,7 +318,7 @@ return function()
     return {RequestedWatts = watts, WattsRemaining = watts, VisititedNetworks = {}, VisitedNodes = {}}
   end
 
-  -- void ReducePowerRequest(request,watts)
+  -- ReducePowerRequest( PowerRequest, uint ) :: void
   -- Reduces the amount of power requested
   -- request: PowerRequest
   -- watts: Amount to reduce by
@@ -339,7 +340,7 @@ return function()
     end
   end
 
-  -- bool ExtractPower(self,watts)
+  -- ExtractPower( Self, uint ) :: bool
   -- Attempts to extract the requested amount of power.
   -- Returns true if the power was extracted.
   function SENetwork:ExtractPower(watts)
@@ -361,7 +362,7 @@ return function()
     NotAllTransfered = 2
   }
 
-  -- {Amount,ReasonCode} TransferItems(network, stack, transferFn)
+  -- TransferItems( Network, SimpleItemStack, Function, Node ) :: {Amount,ReasonCode}
   -- Transfers as many items as possible to/from the network.
   -- network: The network to transfer to/from
   -- stack: The items to transfer
@@ -424,7 +425,7 @@ return function()
     return {Amount = totalAmountTransfered, ReasonCode = reasoncode}
   end
 
-  -- item InsertItems(self,SimpleItemStack,Node)
+  -- InsertItems( Self, SimpleItemStack, Node ) :: uint
   -- Attempts to insert the items.
   -- If the network does not have enough power to insert all the items
   -- as many will be inserted as possible.
@@ -442,7 +443,7 @@ return function()
     return transfer.Amount
   end
 
-  -- int ExtractItems(self,SimpleItemStack,Node)
+  -- ExtractItems( Self, SimpleItemStack, Node ) :: uint
   -- Attempts to extract the items.
   -- If the network does not have enough power to extract all the items
   -- as many will be extracted as possible.
@@ -451,7 +452,7 @@ return function()
     return TransferItems(self, stack, "ExtractItems", requesterNode).Amount
   end
 
-  -- Map( item name -> count) GetStorageContents()
+  -- GetStorageContents( Self ) :: Map( item name -> count)
   -- Returns all items in the network
   function SENetwork:GetStorageContents()
     -- New tick?
@@ -466,13 +467,13 @@ return function()
     return self.StorageCatalog
   end
 
-  -- bool Empty()
+  -- Empty( Self ) :: bool
   -- Returns true if there are no nodes on the network
   function SENetwork:Empty()
     return next(self.ControllerNodes) == nil and SENetwork.EmptyEmptyExceptControllers(self)
   end
 
-  -- bool EmptyExceptControllers()
+  -- EmptyExceptControllers( Self ) :: bool
   -- Returns true if there are no nodes, except controllers, on the network
   function SENetwork:EmptyEmptyExceptControllers()
     return next(self.PowerSourceNodes) == nil and next(self.StorageNodes) == nil and next(self.DeviceNodes) == nil

@@ -11,6 +11,7 @@ return function(BaseHandler)
   }
   setmetatable(InterfaceNodeHandler, {__index = BaseHandler})
 
+  -- CopyNodeFilters( Node, Node ) :: void
   -- Copies the filters from the source to the node
   local function CopyNodeFilters(node, sourceNode)
     -- Get the handler for the source node
@@ -48,6 +49,7 @@ return function(BaseHandler)
     end
   end
 
+  -- SetFiltersFromRecipe( Node, LuaRecipe ) :: void
   -- Sets the filters for the node based on the given recipe
   local function SetFiltersFromRecipe(node, recipe)
     -- Clear node filters
@@ -63,10 +65,12 @@ return function(BaseHandler)
     RecalculateRequestedAmounts(node)
   end
 
+  -- IsFiltered( Self, string ) :: bool
   function InterfaceNodeHandler:IsFiltered(type)
     return type == "item"
   end
 
+  -- GetFilters( Self, string ) :: Map( ItemName :: string => uint )
   function InterfaceNodeHandler:GetFilters(type)
     if (type == "item") then
       return self.RequestedItemAmounts
@@ -74,6 +78,7 @@ return function(BaseHandler)
     return nil
   end
 
+  -- @See BaseNode:OnNetworkTick
   -- Fills interface with filtered items, removes anything else
   function InterfaceNodeHandler:OnNetworkTick(network)
     -- Get the nodes inventory
@@ -154,11 +159,12 @@ return function(BaseHandler)
     end
   end
 
-  -- Build and add the filter GUI to the player
+  -- @See BaseNode:OnPlayerOpenedNode
   function InterfaceNodeHandler:OnPlayerOpenedNode(player)
     return SE.GuiManager.Guis.InterfaceNode
   end
 
+  -- RecalculateRequestedAmounts( Self ) :: void
   -- Recalculates the requested amounts for the interface
   function InterfaceNodeHandler:RecalculateRequestedAmounts()
     local items = {}
@@ -168,7 +174,7 @@ return function(BaseHandler)
     self.RequestedItemAmounts = items
   end
 
-  -- Settings pasted
+  -- @See BaseNode:OnPasteSettings
   function InterfaceNodeHandler:OnPasteSettings(sourceEntity, player)
     local otherNode = SE.Networks.GetNodeForEntity(sourceEntity)
     if (otherNode) then
@@ -180,10 +186,12 @@ return function(BaseHandler)
     end
   end
 
+  -- @See BaseNode.NewNode
   function InterfaceNodeHandler.NewNode(entity)
     return InterfaceNodeHandler.EnsureStructure(BaseHandler.NewNode(entity))
   end
 
+  -- @See BaseNode:EnsureStructure
   function InterfaceNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
 

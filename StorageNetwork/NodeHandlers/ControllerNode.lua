@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/26/2017
+-- Created: 2017-10-26
 -- Description: Controller node
 
 return function(BaseHandler)
@@ -10,6 +10,7 @@ return function(BaseHandler)
   }
   setmetatable(ControllerNode, {__index = BaseHandler})
 
+  -- @See BaseNode.NewNode
   function ControllerNode.NewNode(entity)
     -- Prevent player interaction with the Controller GUI
     entity.operable = false
@@ -17,6 +18,7 @@ return function(BaseHandler)
     return ControllerNode.EnsureStructure(BaseHandler.NewNode(entity))
   end
 
+  -- @See BaseNode:EnsureStructure
   function ControllerNode:EnsureStructure()
     BaseHandler.EnsureStructure(self)
     self.HandlerName = ControllerNode.HandlerName

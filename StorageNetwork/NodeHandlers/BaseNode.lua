@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/26/2017
+-- Created: 2017-10-26
 -- Description: Defines functionality for network nodes
 
 return function()
@@ -12,27 +12,27 @@ return function()
     NeedsTicks = false
   }
 
-  -- bool Valid(self)
+  -- Valid( Self ) :: bool
   -- Called to check if the node is still valid.
   function BaseNodeHandler:Valid()
     return (self.Entity ~= nil and self.Entity.valid)
   end
 
-  -- int ExtractPower(self,watts)
+  -- ExtractPower( Self, Watts) :: int
   -- Called when the network needs power, and ProvidesPower is true.
   -- Return amount of power extracted.
   function BaseNodeHandler:ExtractPower(watts)
     return 0
   end
 
-  -- int StoredPower(self)
+  -- StoredPower( Self ) :: int
   -- Called to determine amount of power stored in the node.
   -- Return amount of power stored.
   function BaseNodeHandler:StoredPower()
     return 0
   end
 
-  -- int InsertItems(self,SimpleItemStack,bool)
+  -- InsertItems( Self, SimpleItemStack, bool ) :: int
   -- Attempts to insert the items.
   -- stack: Items to extract
   -- simulate: When true items will not be transfered, only the counts.
@@ -40,7 +40,7 @@ return function()
   function BaseNodeHandler:InsertItems(stack, simulate)
   end
 
-  -- int ExtractItems(self,SimpleItemStack,bool)
+  -- ExtractItems( Self, SimpleItemStack, bool ) :: int
   -- Attempts to extract the items.
   -- stack: Items to extract
   -- simulate: When true items will not be transfered, only the counts.
@@ -49,13 +49,13 @@ return function()
     return 0
   end
 
-  -- int GetItemCount(self,itemName)
+  -- GetItemCount( Self, ItemName ) :: int
   -- Returns how many of the item there is in the node
   function BaseNodeHandler:GetItemCount(itemName)
     return 0
   end
 
-  -- Position{x,y} GetPosition(self)
+  -- GetPosition( Self ) :: Position{x,y}
   function BaseNodeHandler:GetPosition()
     local pos = self.Entity.position
     if (pos.x == nil) then
@@ -64,12 +64,11 @@ return function()
     return pos
   end
 
-  -- void GetContents(self,catalog)
-  -- catalog: Map( item name -> count)
+  -- GetContents( Self, Map( ItemID :: string => Amount :: uint ) ) :: void
   function BaseNodeHandler:GetContents(catalog)
   end
 
-  -- LuaCircuitNetwork GetCircuitNetwork(self,wireType)
+  -- GetCircuitNetwork( Self, WireType ) :: LuaCircuitNetwork
   -- Returns the circuit network or nil
   function BaseNodeHandler:GetCircuitNetwork(wireType)
     return self.Entity.get_circuit_network(wireType)
@@ -94,23 +93,23 @@ return function()
   function BaseNodeHandler:OnTick()
   end
 
-  -- void OnNetworkTick(self,network,deltaTicks)
+  -- OnNetworkTick( Self, Network ) :: void
   -- Called when the network ticks, if NeedsTicks is true.
   -- network: The network that is ticking, this can be either network the node is attached to.
   function BaseNodeHandler:OnNetworkTick(network)
   end
 
-  -- void OnJoinNetwork(self,network)
+  -- OnJoinNetwork( Self, Network ) :: void
   -- Called just after node joins an active network.
   function BaseNodeHandler:OnJoinNetwork(network)
   end
 
-  -- void OnLeaveNetwork(self,network)
+  -- OnLeaveNetwork( Self, Network ) :: void
   -- Called just before the node leaves an network.
   function BaseNodeHandler:OnLeaveNetwork(network)
   end
 
-  -- GuiHandler OnPlayerOpenedNode(self,player)
+  -- OnPlayerOpenedNode( Self, LuaPlayer) :: GuiHandler
   -- Called when a player has opened this node
   -- This will only be called if the entity this node represents does something when it is clicked.
   -- Return a GUI handler to show that GUI
@@ -119,18 +118,19 @@ return function()
     return nil
   end
 
-  -- void OnPlayerClosedNode(self,player)
+  -- OnPlayerClosedNode( Self, LuaPlayer ) :: void
   -- Called when this node was opened by a player, but the player has just closed it.
   function BaseNodeHandler:OnPlayerClosedNode(player)
     --player.print("Node closed by " .. player.name)
   end
 
-  -- void OnPasteSettings(self,sourceEntity, player)
+  -- OnPasteSettings( Self, LuaEntity, LuaPlayer ) :: void
   -- Called when pasting the settings of another entity
   function BaseNodeHandler:OnPasteSettings(sourceEntity, player)
     --player.print("Would get settings from entity " .. sourceEntity.name)
   end
 
+  -- NewNode( LuaEntity ) :: Node
   -- Creates a new network node
   function BaseNodeHandler.NewNode(entity)
     --SE.Logger.Trace("Creating new node")
@@ -142,6 +142,7 @@ return function()
     )
   end
 
+  -- EnsureStructure( Self ) :: Self
   -- Called to ensure the internal structure of the node is established
   function BaseNodeHandler:EnsureStructure()
     -- Networks: The network(s) the node is attached to.

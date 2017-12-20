@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/17/2017
+-- Created: 2017-10-17
 -- Description: Provides logging for the mod
 -- Singleton
 

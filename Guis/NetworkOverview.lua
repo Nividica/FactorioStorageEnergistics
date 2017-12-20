@@ -1,18 +1,21 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
 -- Created: 2017-12-13
--- Description:
+-- Description: Manages the global UI for storage networks.
 
--- Dropdown listing all networks, ID = circuit network id
+-- Constructs and returns the NetworkOverviewGUI
 return function(BaseGUI)
   local NetworkOverviewGUI = {
     NeedsTicks = true,
-    TicksBetweenUpdates = 60.0 * 2.5
+    TicksBetweenUpdates = 60.0 * 5.0
   }
   setmetatable(NetworkOverviewGUI, {__index = BaseGUI})
 
   require "Utils/Strings"
 
+  local LocalStrings = SE.Constants.Strings.Local
+
+  -- AddCountToSlot( LuaGuiElement ) :: void
   -- Alright, this sucks, but I have yet to find a better way
   -- to add the shadow to the count
   local function AddCountToSlot(parent)
@@ -67,6 +70,7 @@ return function(BaseGUI)
     return {TLS = tlShadow, BRS = brShadow, Label = numLabel}
   end
 
+  -- NewItemCell( LuaGuiElement ) :: ItemCell
   -- ItemCell :: { Cell, Slot, CountLabels :: { TLS, BRS, Label }, Label }
   local function NewItemCell(itemTable)
     local cellWidth = 275
@@ -76,7 +80,7 @@ return function(BaseGUI)
       itemTable.add(
       {
         type = "flow",
-        tooltip = "<Warning: Unused Cell>"
+        tooltip = "<Warning: Unused Item Cell>"
       }
     )
     itemCell.style.minimal_width = cellWidth
@@ -112,13 +116,14 @@ return function(BaseGUI)
     return {Cell = itemCell, Slot = slot, CountLabels = countLabels, Label = itemLabel}
   end
 
+  -- NewItemCell( LuaGuiElement, ItemInfo ) :: void
   -- Update the tooltip, count, and icon to match the given item
   local function UpdateItemCell(itemCell, item)
     -- Get the item prototype
     local itemPrototype = game.item_prototypes[item.ID]
 
     -- Update tooltip
-    itemCell.Cell.tooltip = {"", NumberToStringWithThousands(item.Count) .. "x ", itemPrototype.localised_name}
+    itemCell.Cell.tooltip = ConcatStringWithLocalized(NumberToStringWithThousands(item.Count) .. "x ", itemPrototype.localised_name)
 
     -- Update the slot
     itemCell.Slot.elem_value = itemPrototype.name
@@ -133,6 +138,7 @@ return function(BaseGUI)
     itemCell.Label.caption = itemPrototype.localised_name
   end
 
+  -- DisplayItems( Table, ItemInfo ) :: void
   -- Shows the items in the table
   -- Where items = Map( itemName => count )
   local function DisplayItems(guiData, items)
@@ -196,6 +202,7 @@ return function(BaseGUI)
     end
   end
 
+  -- LoadNetworkContents( Table ) :: void
   -- Adds the contents of the network to the frame
   local function LoadNetworkContents(guiData)
     -- Get the network
@@ -218,11 +225,12 @@ return function(BaseGUI)
       capacityPercent = 1.0 - (freeSlots / totalSlots)
     end
     guiData.FrameData.Capacity.value = capacityPercent
-    guiData.FrameData.Capacity.tooltip = "Network is at " .. (math.floor(capacityPercent * 1000) / 10) .. "% type capacity"
+    guiData.FrameData.Capacity.tooltip = ConcatStringWithLocalized(LocalStrings.NetCap, tostring(math.floor(capacityPercent * 1000) / 10) .. "%")
 
     DisplayItems(guiData, networkContents)
   end
 
+  -- UpdateDropdownNetworks( Table )
   -- Sets the networks in the dropdown
   local function UpdateDropdownNetworks(guiData)
     -- Get network ids
@@ -245,7 +253,7 @@ return function(BaseGUI)
           table.remove(guiData.NetworkIDs, idx)
         else
           -- Add to the dropdown list
-          ddList[#ddList + 1] = "Network #" .. tostring(networkID)
+          ddList[#ddList + 1] = ConcatStringWithLocalized(LocalStrings.NetworkID, "# " .. tostring(networkID))
         end
 
         -- Decrement index
@@ -260,11 +268,11 @@ return function(BaseGUI)
     end
   end
 
-  -- Returns FrameData {
-  -- ItemTable
-  -- NetworkDropDown
-  -- Capacity
-  -- }
+  -- NewFrame( LuaGuiElement ) :: FrameData
+  -- FrameData
+  -- - ItemTable :: LuaGuiElement
+  -- - NetworkDropDown :: LuaGuiElement
+  -- - Capacity :: LuaGuiElement
   local function NewFrame(root)
     local width = 600
     local height = 450
@@ -275,7 +283,7 @@ return function(BaseGUI)
       {
         type = "frame",
         name = SE.Constants.Names.Gui.NetworkFrame,
-        caption = "Storage Network" -- TODO: Make localized
+        caption = LocalStrings.StorageNetwork
       }
     )
     frame.style.title_bottom_padding = 10
@@ -301,7 +309,7 @@ return function(BaseGUI)
     )
     header.style.minimal_width = width
     header.style.bottom_padding = 10
-    header.style.column_alignments[1] = "top-right" -- Seems to have no effect
+    header.style.column_alignments[1] = "top-right"
 
     -- Add dropdown to header
     local networkDropDown =
@@ -314,17 +322,30 @@ return function(BaseGUI)
     )
 
     -- Add the progress bar
-    local pgbWidth = width - 20
     local progBar =
       header.add(
       {
         type = "progressbar",
-        size = pgbWidth,
+        size = width,
         value = 0,
         tooltip = ""
       }
     )
-    progBar.style.minimal_width = pgbWidth
+    progBar.style.minimal_width = width
+
+    -- Header horizontal line
+    local h_hzline =
+      header.add(
+      {
+        type = "progressbar",
+        size = width,
+        value = 1.0,
+        style = "se_horizontal_line"
+      }
+    )
+    h_hzline.style.minimal_width = width
+    h_hzline.style.minimal_height = 2
+    h_hzline.style.maximal_height = 2
 
     -- Add scroll pane
     local scrollWrapper =
@@ -350,9 +371,45 @@ return function(BaseGUI)
       }
     )
 
+    -- Add footer
+    local footer =
+      contents.add(
+      {
+        type = "table",
+        name = "footer",
+        colspan = 1
+      }
+    )
+    footer.style.minimal_width = width
+    footer.style.column_alignments[1] = "middle-right"
+
+    -- Footer horizontal line
+    local f_hzline =
+      footer.add(
+      {
+        type = "progressbar",
+        size = width,
+        value = 1.0,
+        style = "se_horizontal_line"
+      }
+    )
+    f_hzline.style.minimal_width = width
+    f_hzline.style.minimal_height = 2
+    f_hzline.style.maximal_height = 2
+
+    -- Add close button
+    footer.add(
+      {
+        type = "button",
+        caption = LocalStrings.Close,
+        name = "se_network_overview_close"
+      }
+    )
+
     return {ItemTable = itemTable, NetworkDropDown = networkDropDown, Capacity = progBar}
   end
 
+  -- @See BaseGui:OnShow
   function NetworkOverviewGUI:OnShow(player)
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
@@ -363,6 +420,12 @@ return function(BaseGUI)
       NetworkOverviewGUI.OnClose(self, player)
     end
 
+    -- Does the player have something else opened?
+    if (player.opened ~= nil) then
+      -- Player has something else open
+      return false
+    end
+
     -- Build the frame
     self.FrameData = NewFrame(root)
 
@@ -371,8 +434,11 @@ return function(BaseGUI)
 
     -- Add tick info
     self.TickCount = 0
+
+    return true
   end
 
+  -- @See BaseGui:OnClose
   function NetworkOverviewGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
     local frame = root[SE.Constants.Names.Gui.NetworkFrame]
@@ -381,25 +447,44 @@ return function(BaseGUI)
     end
   end
 
+  -- @See BaseGui:OnPlayerChangedDropDown
   function NetworkOverviewGUI:OnPlayerChangedDropDown(player, element)
     LoadNetworkContents(self, self.NetworkIDs[element.selected_index])
   end
 
+  -- @See BaseGUI:OnPlayerClicked
+  function NetworkOverviewGUI:OnPlayerClicked(player, element)
+    if (element ~= nil and element.name == "se_network_overview_close") then
+      SE.GuiManager.CloseGui(player, NetworkOverviewGUI)
+    end
+  end
+
+  -- @See BaseGui:OnTick
   function NetworkOverviewGUI:OnTick(player)
     if (self == nil or self.TickCount == nil) then
       -- Invalid data, close the gui
-      NetworkOverviewGUI.OnClose(player, nil)
+      NetworkOverviewGUI.OnClose(nil, player)
+      return false
     end
+
+    if (player.opened ~= nil) then
+      -- Player has opened something else, close this
+      NetworkOverviewGUI.OnClose(self, player)
+      return false
+    end
+
     -- Increment tick count
     self.TickCount = self.TickCount + 1
 
     -- Skip this tick?
     if (self.TickCount < NetworkOverviewGUI.TicksBetweenUpdates) then
-      return
+      return true
     end
     self.TickCount = 0
 
     LoadNetworkContents(self)
+
+    return true
   end
 
   return NetworkOverviewGUI

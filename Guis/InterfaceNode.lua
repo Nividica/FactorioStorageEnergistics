@@ -3,10 +3,12 @@
 -- Created: 2017-12-12
 -- Description:
 
+-- Constructs and returns the InterfaceNodeGUI object
 return function(BaseGUI)
   local InterfaceNodeGUI = {}
   setmetatable(InterfaceNodeGUI, {__index = BaseGUI})
 
+  -- @See BaseGUI:OnShow
   function InterfaceNodeGUI:OnShow(player)
     -- Get the network node
     local node = self.Node
@@ -18,7 +20,7 @@ return function(BaseGUI)
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
     if (frame ~= nil) then
       -- Already open
-      return
+      return false
     end
 
     -- Add the frame
@@ -27,7 +29,7 @@ return function(BaseGUI)
       {
         type = "frame",
         name = SE.Constants.Names.Gui.InterfaceFrame,
-        caption = "Energistics request" -- Make localized
+        caption = SE.Constants.Strings.Local.InterfaceSettings
       }
     )
     frame.style.title_bottom_padding = 6
@@ -53,8 +55,11 @@ return function(BaseGUI)
         }
       )
     end
+
+    return true
   end
 
+  -- @See BaseGUI:OnClose
   function InterfaceNodeGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
@@ -63,7 +68,7 @@ return function(BaseGUI)
     end
   end
 
-  -- Player changed a gui filter
+  -- @See BaseGUI:OnPlayerChangedSelectionElement
   function InterfaceNodeGUI:OnPlayerChangedSelectionElement(player, element)
     -- Get the index of the changed element
     local index = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))

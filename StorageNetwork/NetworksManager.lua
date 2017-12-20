@@ -1,6 +1,6 @@
 -- This file is part of Storage Energistics
 -- Author: Nividica
--- Created: 10/26/2017
+-- Created: 2017-10-26
 -- Description: Manages all storage networks
 
 return function()
