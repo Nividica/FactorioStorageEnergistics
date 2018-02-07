@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "title": "Storage Energistics",
   "author": "Nividica",
-  "description": "Digitially store and transfer items via the circuit network!",
+  "description": "Digitally store and transfer items via the circuit network!",
   "factorio_version": "0.15",
   "dependencies": [
     "base >= 0.15"
