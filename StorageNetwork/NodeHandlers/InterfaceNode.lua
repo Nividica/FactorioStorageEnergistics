@@ -195,7 +195,7 @@ return function(BaseHandler)
   function InterfaceNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
 
-    -- Map( FilterIndex :: int -> ItemName :: string )
+    -- Map( FilterIndex :: int -> { Item :: string, Amount :: int } )
     -- Used by the GUI to display selected items
     self.RequestFilters = self.RequestFilters or {}
 

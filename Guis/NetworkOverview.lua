@@ -12,66 +12,12 @@ return function(BaseGUI)
   setmetatable(NetworkOverviewGUI, {__index = BaseGUI})
 
   require "Utils/Strings"
+  require "Utils/GUIHelper"
 
   local LocalStrings = SE.Constants.Strings.Local
 
-  -- AddCountToSlot( LuaGuiElement ) :: void
-  -- Alright, this sucks, but I have yet to find a better way
-  -- to add the shadow to the count
-  local function AddCountToSlot(parent)
-    local shadow_color = {r = 0.2, g = 0.2, b = 0.25}
-    local vert_center = 14
-    local label_style = "electric_usage_label_style"
-    local font_style = "default-small-bold"
-    local countStr = tostring(-1)
-
-    -- Top-left shadow
-    local tlShadow =
-      parent.add(
-      {
-        type = "label",
-        caption = countStr,
-        style = label_style
-      }
-    )
-    tlShadow.style.top_padding = vert_center - 1
-    tlShadow.style.left_padding = 0
-    tlShadow.style.font = font_style
-    tlShadow.style.font_color = shadow_color
-
-    -- Bottom-right shadow
-    local brShadow =
-      parent.add(
-      {
-        type = "label",
-        caption = countStr,
-        style = label_style
-      }
-    )
-    brShadow.style.top_padding = vert_center + 1
-    brShadow.style.left_padding = 2
-    brShadow.style.font = font_style
-    brShadow.style.font_color = shadow_color
-
-    -- Foreground
-    local numLabel =
-      parent.add(
-      {
-        type = "label",
-        caption = countStr,
-        style = label_style
-      }
-    )
-    numLabel.style.top_padding = vert_center
-    numLabel.style.left_padding = 1
-    numLabel.style.font = font_style
-    numLabel.style.font_color = {r = 1, g = 1, b = 1}
-
-    return {TLS = tlShadow, BRS = brShadow, Label = numLabel}
-  end
-
   -- NewItemCell( LuaGuiElement ) :: ItemCell
-  -- ItemCell :: { Cell, Slot, CountLabels :: { TLS, BRS, Label }, Label }
+  -- ItemCell :: { Cell, Slot, Label }
   local function NewItemCell(itemTable)
     local cellWidth = 275
 
@@ -94,13 +40,15 @@ return function(BaseGUI)
         elem_type = "item",
         item = nil,
         name = "slot",
-        enabled = false,
-        style = "se_slot_button_style"
+        style = "slot_button"
       }
     )
 
+    -- Lock
+    slot.locked = true
+
     -- Add count
-    local countLabels = AddCountToSlot(slot)
+    AddCountToSlot(slot)
 
     -- Add the label
     local itemLabel =
@@ -113,7 +61,7 @@ return function(BaseGUI)
       }
     )
 
-    return {Cell = itemCell, Slot = slot, CountLabels = countLabels, Label = itemLabel}
+    return {Cell = itemCell, Slot = slot, Label = itemLabel}
   end
 
   -- NewItemCell( LuaGuiElement, ItemInfo ) :: void
@@ -129,10 +77,7 @@ return function(BaseGUI)
     itemCell.Slot.elem_value = itemPrototype.name
 
     -- Update counts
-    local countStr = NumberToStringWithSuffix(item.Count)
-    itemCell.CountLabels.TLS.caption = countStr
-    itemCell.CountLabels.BRS.caption = countStr
-    itemCell.CountLabels.Label.caption = countStr
+    UpdateSlotCount(itemCell.Slot, item.Count)
 
     -- Update label
     itemCell.Label.caption = itemPrototype.localised_name
@@ -294,7 +239,7 @@ return function(BaseGUI)
       {
         type = "table",
         name = "contents",
-        colspan = 1
+        column_count = 1
       }
     )
 
@@ -304,7 +249,7 @@ return function(BaseGUI)
       {
         type = "table",
         name = "header",
-        colspan = 1
+        column_count = 1
       }
     )
     header.style.minimal_width = width
@@ -367,7 +312,7 @@ return function(BaseGUI)
       {
         type = "table",
         name = "item_table",
-        colspan = 2
+        column_count = 2
       }
     )
 
@@ -377,7 +322,7 @@ return function(BaseGUI)
       {
         type = "table",
         name = "footer",
-        colspan = 1
+        column_count = 1
       }
     )
     footer.style.minimal_width = width

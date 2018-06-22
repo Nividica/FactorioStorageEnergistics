@@ -80,6 +80,7 @@ data:extend(
       },
       main_product = "",
       icon = SEConstants.DataPaths.Icons .. "SE_ChestMk1_Upgrade.png",
+      icon_size = 32,
       results = {
         {type = "item", name = SEConstants.Names.Proto.StorageChestMk2.Item, amount = 1}
       },

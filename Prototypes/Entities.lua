@@ -24,6 +24,7 @@ data:extend(
       type = "accumulator",
       name = SEConstants.Names.Proto.EnergyAcceptor.Entity,
       icon = SEConstants.DataPaths.Icons .. "SE_EnergyAcceptor.png",
+      icon_size = 32,
       flags = {"placeable-neutral", "player-creation"},
       minable = {hardness = 0.2, mining_time = 0.4, result = SEConstants.Names.Proto.EnergyAcceptor.Item},
       max_health = 100,
@@ -76,7 +77,7 @@ data:extend(
           green = {0.6575, 0.71875}
         }
       },
-      circuit_connector_sprites = get_circuit_connector_sprites({0.46875, 0.5}, {0.46875, 0.8125}, 26),
+      circuit_connector_sprites = circuit_connector_definitions["accumulator"].sprites,
       circuit_wire_max_distance = 9,
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.7},
       map_color = {r = 0.61, g = 0.23, b = 0.64}
@@ -86,6 +87,7 @@ data:extend(
       type = "constant-combinator",
       name = SEConstants.Names.Proto.Controller.Entity,
       icon = SEConstants.DataPaths.Icons .. "SE_Controller.png",
+      icon_size = 32,
       flags = {"placeable-neutral", "player-creation"},
       minable = {hardness = 0.4, mining_time = 0.7, result = SEConstants.Names.Proto.Controller.Item},
       max_health = 1000,
@@ -133,28 +135,28 @@ data:extend(
       },
       activity_led_sprites = {
         north = {
-          filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-north.png",
+          filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-N.png",
           width = 11,
           height = 10,
           frame_count = 1,
           shift = {0.296875, -0.40625}
         },
         east = {
-          filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-east.png",
+          filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-E.png",
           width = 14,
           height = 12,
           frame_count = 1,
           shift = {0.25, -0.03125}
         },
         south = {
-          filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-south.png",
+          filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-S.png",
           width = 11,
           height = 11,
           frame_count = 1,
           shift = {-0.296875, -0.078125}
         },
         west = {
-          filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-west.png",
+          filename = "__base__/graphics/entity/combinator/activity-leds/arithmetic-combinator-LED-W.png",
           width = 12,
           height = 12,
           frame_count = 1,
@@ -220,6 +222,7 @@ data:extend(
       type = "container",
       name = SEConstants.Names.Proto.StorageChestMk1.Entity,
       icon = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk1.png",
+      icon_size = 32,
       flags = {"placeable-neutral", "player-creation"},
       minable = {mining_time = 2, result = SEConstants.Names.Proto.StorageChestMk1.Item},
       max_health = 200,
@@ -258,7 +261,7 @@ data:extend(
           green = {0.38625, 0.375}
         }
       },
-      circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites,
       circuit_wire_max_distance = 9
     },
     -- Storage Chest Mk2
@@ -266,6 +269,7 @@ data:extend(
       type = "container",
       name = SEConstants.Names.Proto.StorageChestMk2.Entity,
       icon = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk2.png",
+      icon_size = 32,
       flags = {"placeable-neutral", "player-creation"},
       minable = {mining_time = 3, result = SEConstants.Names.Proto.StorageChestMk2.Item},
       max_health = 500,
@@ -304,7 +308,7 @@ data:extend(
           green = {0.38625, 0.375}
         }
       },
-      circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites,
       circuit_wire_max_distance = 9
     },
     -- Interface Chest
@@ -312,6 +316,7 @@ data:extend(
       type = "container",
       name = SEConstants.Names.Proto.InterfaceChest.Entity,
       icon = SEConstants.DataPaths.EntityGFX .. "SE_InterfaceChest.png",
+      icon_size = 32,
       flags = {"placeable-neutral", "player-creation"},
       minable = {mining_time = 1, result = SEConstants.Names.Proto.InterfaceChest.Item},
       max_health = 200,
@@ -350,7 +355,7 @@ data:extend(
           green = {0.38625, 0.375}
         }
       },
-      circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites,
       circuit_wire_max_distance = 9
     },
     -- Provider chest
@@ -358,6 +363,7 @@ data:extend(
       type = "logistic-container",
       name = SEConstants.Names.Proto.ProviderChest.Entity,
       icon = SEConstants.DataPaths.EntityGFX .. "SE_ProviderChest.png",
+      icon_size = 32,
       flags = {"placeable-player", "player-creation"},
       minable = {hardness = 0.2, mining_time = 0.5, result = SEConstants.Names.Proto.ProviderChest.Item},
       max_health = 350,
@@ -398,13 +404,14 @@ data:extend(
         }
       },
       circuit_wire_max_distance = 9,
-      circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18)
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites
     },
     -- Requester chest
     {
       type = "logistic-container",
       name = SEConstants.Names.Proto.RequesterChest.Entity,
       icon = SEConstants.DataPaths.EntityGFX .. "SE_RequesterChest.png",
+      icon_size = 32,
       flags = {"placeable-player", "player-creation"},
       minable = {hardness = 0.2, mining_time = 0.5, result = SEConstants.Names.Proto.RequesterChest.Item},
       max_health = 350,
@@ -423,6 +430,7 @@ data:extend(
       },
       fast_replaceable_group = "container",
       inventory_size = 16,
+      logistic_slots_count = 12,
       logistic_mode = "requester",
       open_sound = {filename = "__base__/sound/metallic-chest-open.ogg", volume = 0.65},
       close_sound = {filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7},
@@ -445,7 +453,7 @@ data:extend(
         }
       },
       circuit_wire_max_distance = 9,
-      circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18)
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites
     }
   }
 )

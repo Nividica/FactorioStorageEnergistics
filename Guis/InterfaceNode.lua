@@ -8,10 +8,33 @@ return function(BaseGUI)
   local InterfaceNodeGUI = {}
   setmetatable(InterfaceNodeGUI, {__index = BaseGUI})
 
+  require "Utils/GUIHelper"
+
+  -- Removes the selection highlight
+  local function RemoveSelection(self)
+    if (self.SelectedIndex > 0) then
+      local prevSelectedSlot = self.Slots[self.SelectedIndex]
+      prevSelectedSlot.style = "slot_button"
+      prevSelectedSlot.locked = (self.Node.RequestFilters[self.SelectedIndex] ~= nil)
+      self.SelectedIndex = 0
+    end
+  end
+
+  -- Sets the selection highlight
+  local function SetSelection(self, index)
+    RemoveSelection(self)
+
+    if (self.Node.RequestFilters[index] ~= nil) then
+      self.SelectedIndex = index
+      local slot = self.Slots[index]
+      slot.style = "selected_slot_button"
+      slot.locked = false
+    end
+  end
+
   -- @See BaseGUI:OnShow
   function InterfaceNodeGUI:OnShow(player)
-    -- Get the network node
-    local node = self.Node
+    self.SelectedIndex = 0
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
@@ -40,20 +63,33 @@ return function(BaseGUI)
       {
         type = "table",
         name = "body",
-        colspan = 5
+        column_count = 5
       }
     )
 
-    -- Add selection buttons
+    -- Add selection slots
+    self.Slots = {}
     for idx = 1, 10 do
-      body.add(
+      -- Add slot
+      self.Slots[idx] =
+        body.add(
         {
           type = "choose-elem-button",
           name = SE.Constants.Names.Gui.InterfaceItemSelectionElement .. tostring(idx),
           elem_type = "item",
-          item = node.RequestFilters[idx]
+          item = self.Node.RequestFilters[idx],
+          style = (idx == self.SelectedIndex) and "selected_slot_button" or "slot_button"
         }
       )
+
+      -- Add count
+      AddCountToSlot(self.Slots[idx], self.Node.RequestedItemAmounts[idx])
+    end
+
+    -- Slots can only be locked after being added
+    for idx = 1, 10 do
+      -- Lock a slot if it has a filter and it is not the selected slot
+      self.Slots[idx].locked = (self.Node.RequestFilters[idx] ~= nil) and (idx ~= self.SelectedIndex)
     end
 
     return true
@@ -78,6 +114,29 @@ return function(BaseGUI)
 
     -- Recalc request amounts
     self.Handler.RecalculateRequestedAmounts(self.Node)
+
+    -- Select button
+    SetSelection(self, index)
+  end
+
+  -- @See BaseGUI:OnPlayerClicked
+  function InterfaceNodeGUI:OnPlayerClicked(player, element)
+    -- Is the clicked element a select element button?
+    if (element.type == "choose-elem-button") then
+      -- Get the index of the slot
+      local clickedIdx = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
+
+      -- Clicked slot is not selected?
+      if (clickedIdx ~= self.SelectedIndex) then
+        -- Does the clicked slot have a filter?
+        if (self.Node.RequestFilters[clickedIdx] ~= nil) then
+          -- Select the slot
+          SetSelection(self, clickedIdx)
+        end
+
+      -- Do things with slider!
+      end
+    end
   end
 
   return InterfaceNodeGUI

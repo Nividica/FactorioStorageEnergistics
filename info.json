@@ -1,11 +1,11 @@
 {
   "name": "storage_energistics",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "title": "Storage Energistics",
   "author": "Nividica",
   "description": "Digitally store and transfer items via the circuit network!",
-  "factorio_version": "0.15",
+  "factorio_version": "0.16",
   "dependencies": [
-    "base >= 0.15"
+    "base >= 0.16"
   ]
 }
