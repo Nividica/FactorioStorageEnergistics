@@ -81,7 +81,7 @@ return function()
     return false
   end
 
-  -- GetFilters(self :: Node, type :: string) :: Array( {Item :: string, RequestedAmount :: int} )
+  -- GetFilters(self :: Node, type :: string) :: Array( { Item :: string, Amount :: int } )
   -- Returns this nodes filters, or nil
   -- type: Filter type, item, fluid, etc
   function BaseNodeHandler:GetFilters(type)

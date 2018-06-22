@@ -64,7 +64,7 @@ return function(BaseHandler)
     return type == "item"
   end
 
-  -- GetFilters( Self, string ) :: Map( ItemName :: string => uint )
+  -- GetFilters( Self, string ) :: Array( { Item :: string, Amount: int } )
   function InterfaceNodeHandler:GetFilters(type)
     if (type == "item") then
       return self.RequestFilters
