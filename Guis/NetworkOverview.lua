@@ -398,7 +398,9 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerClicked
-  function NetworkOverviewGUI:OnPlayerClicked(player, element)
+  function NetworkOverviewGUI:OnPlayerClicked(player, event)
+    local element = event.element
+
     if (element ~= nil and element.name == "se_network_overview_close") then
       SE.GuiManager.CloseGui(player, NetworkOverviewGUI)
     end

@@ -25,10 +25,39 @@ return function(BaseGUI)
     RemoveSelection(self)
 
     if (self.Node.RequestFilters[index] ~= nil) then
+      -- Set selected index
       self.SelectedIndex = index
+
+      -- Get the slot
       local slot = self.Slots[index]
+
+      -- Set highlighted and unlocked
       slot.style = "selected_slot_button"
       slot.locked = false
+    end
+  end
+
+  local function SetFilter(self, index, filter)
+    -- Set filter
+    self.Node.RequestFilters[index] = filter
+
+    local slot = self.Slots[index]
+    if (filter ~= nil) then
+      -- Update slot
+      slot.elem_value = filter.Item
+      UpdateSlotCount(slot, filter.Amount)
+    else
+      -- Clear slot
+      slot.elem_value = nil
+      UpdateSlotCount(slot, nil)
+
+      -- If this slot was selected, remove selection
+      if (index == self.SelectedIndex) then
+        RemoveSelection(self)
+      else
+        -- Ensure empty slots are unlocked
+        slot.locked = false
+      end
     end
   end
 
@@ -69,6 +98,7 @@ return function(BaseGUI)
 
     -- Add selection slots
     self.Slots = {}
+    local filters = self.Node.RequestFilters
     for idx = 1, 10 do
       -- Add slot
       self.Slots[idx] =
@@ -77,19 +107,19 @@ return function(BaseGUI)
           type = "choose-elem-button",
           name = SE.Constants.Names.Gui.InterfaceItemSelectionElement .. tostring(idx),
           elem_type = "item",
-          item = self.Node.RequestFilters[idx],
+          item = (filters[idx] ~= nil and filters[idx].Item) or nil,
           style = (idx == self.SelectedIndex) and "selected_slot_button" or "slot_button"
         }
       )
 
       -- Add count
-      AddCountToSlot(self.Slots[idx], self.Node.RequestedItemAmounts[idx])
+      AddCountToSlot(self.Slots[idx], (filters[idx] ~= nil and filters[idx].Amount) or nil)
     end
 
     -- Slots can only be locked after being added
     for idx = 1, 10 do
       -- Lock a slot if it has a filter and it is not the selected slot
-      self.Slots[idx].locked = (self.Node.RequestFilters[idx] ~= nil) and (idx ~= self.SelectedIndex)
+      self.Slots[idx].locked = (filters[idx] ~= nil) and (idx ~= self.SelectedIndex)
     end
 
     return true
@@ -109,18 +139,22 @@ return function(BaseGUI)
     -- Get the index of the changed element
     local index = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
 
-    -- Set the filter
-    self.Node.RequestFilters[index] = element.elem_value
+    if (element.elem_value ~= nil) then
+      -- Set filter
+      SetFilter(self, index, {Item = element.elem_value, Amount = 1})
 
-    -- Recalc request amounts
-    self.Handler.RecalculateRequestedAmounts(self.Node)
-
-    -- Select button
-    SetSelection(self, index)
+      -- Select button
+      SetSelection(self, index)
+    else
+      -- Clear filter
+      SetFilter(self, index, nil)
+    end
   end
 
   -- @See BaseGUI:OnPlayerClicked
-  function InterfaceNodeGUI:OnPlayerClicked(player, element)
+  function InterfaceNodeGUI:OnPlayerClicked(player, event)
+    local element = event.element
+
     -- Is the clicked element a select element button?
     if (element.type == "choose-elem-button") then
       -- Get the index of the slot
@@ -130,8 +164,14 @@ return function(BaseGUI)
       if (clickedIdx ~= self.SelectedIndex) then
         -- Does the clicked slot have a filter?
         if (self.Node.RequestFilters[clickedIdx] ~= nil) then
-          -- Select the slot
-          SetSelection(self, clickedIdx)
+          -- Was the click a right click?
+          if (event.button == defines.mouse_button_type.right) then
+            -- Clear the slot
+            SetFilter(self, clickedIdx, nil)
+          else
+            -- Select the slot
+            SetSelection(self, clickedIdx)
+          end
         end
 
       -- Do things with slider!

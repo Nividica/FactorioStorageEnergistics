@@ -61,10 +61,10 @@ return function()
   function BaseGUI:OnPlayerChangedDropDown(player, element)
   end
 
-  -- OnPlayerClicked( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerClicked( Self, LuaPlayer, Event ) :: void
   -- Called when the player clicks something.
-  -- Self: Gui data. @See BaseGUI:OnShow for more details.
-  function BaseGUI:OnPlayerClicked(player, element)
+  -- Self: Gui data. @See GuiManager::OnElementClicked for more details.
+  function BaseGUI:OnPlayerClicked(player, event)
   end
 
   return BaseGUI

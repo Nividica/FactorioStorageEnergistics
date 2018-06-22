@@ -26,7 +26,6 @@ return function(BaseHandler)
 
     -- Clear node filters
     node.RequestFilters = {}
-    node.RequestedItemAmounts = {}
 
     -- Get source filters
     local sFilters = sHandler.GetFilters(sourceNode, "item")
@@ -36,15 +35,12 @@ return function(BaseHandler)
     end
 
     -- Copy the filters
-    for item, amount in pairs(sFilters) do
-      -- Set the amount
-      node.RequestedItemAmounts[item] = amount
-
+    for _, filter in pairs(sFilters) do
       -- Determine how many GUI slots this will occupy
       local reqSlots = math.ceil(amount / SE.StackSizeCache[item])
       -- Add gui slots
       for i = 1, reqSlots do
-        table.insert(node.RequestFilters, item)
+        table.insert(node.RequestFilters, {Item = filter.Item, Amount = filter.Amount})
       end
     end
   end
@@ -58,11 +54,9 @@ return function(BaseHandler)
       -- Only copy items
       if (ingredient.type == "item") then
         -- Add the item
-        table.insert(node.RequestFilters, ingredient.name)
+        table.insert(node.RequestFilters, {Item = ingredient.name, Amount = ingredient.amount})
       end
     end
-    -- Update request amounts
-    RecalculateRequestedAmounts(node)
   end
 
   -- IsFiltered( Self, string ) :: bool
@@ -73,7 +67,7 @@ return function(BaseHandler)
   -- GetFilters( Self, string ) :: Map( ItemName :: string => uint )
   function InterfaceNodeHandler:GetFilters(type)
     if (type == "item") then
-      return self.RequestedItemAmounts
+      return self.RequestFilters
     end
     return nil
   end
@@ -85,7 +79,7 @@ return function(BaseHandler)
     local inv = self.Entity.get_inventory(defines.inventory.chest)
 
     -- No work to perform?
-    if (inv.is_empty() and next(self.RequestedItemAmounts) == nil) then
+    if (inv.is_empty() and next(self.RequestFilters) == nil) then
       --SE.Logger.Trace("No work for interface")
       return
     end
@@ -95,8 +89,8 @@ return function(BaseHandler)
 
     -- Assume all filters are to be fully requested
     local toAdd = {}
-    for itemName, Amount in pairs(self.RequestedItemAmounts) do
-      toAdd[itemName] = Amount
+    for _, filter in pairs(self.RequestFilters) do
+      toAdd[filter.Item] = (toAdd[filter.Item] or 0) + filter.Amount
     end
 
     -- Debug
@@ -164,16 +158,6 @@ return function(BaseHandler)
     return SE.GuiManager.Guis.InterfaceNode
   end
 
-  -- RecalculateRequestedAmounts( Self ) :: void
-  -- Recalculates the requested amounts for the interface
-  function InterfaceNodeHandler:RecalculateRequestedAmounts()
-    local items = {}
-    for _, itemName in pairs(self.RequestFilters) do
-      items[itemName] = (items[itemName] or 0) + SE.StackSizeCache[itemName]
-    end
-    self.RequestedItemAmounts = items
-  end
-
   -- @See BaseNode:OnPasteSettings
   function InterfaceNodeHandler:OnPasteSettings(sourceEntity, player)
     local otherNode = SE.Networks.GetNodeForEntity(sourceEntity)
@@ -198,10 +182,6 @@ return function(BaseHandler)
     -- Map( FilterIndex :: int -> { Item :: string, Amount :: int } )
     -- Used by the GUI to display selected items
     self.RequestFilters = self.RequestFilters or {}
-
-    -- Map( ItemName :: string -> RequestedAmount :: int )
-    -- Used internaly as the aggrigation of the request filters
-    self.RequestedItemAmounts = self.RequestedItemAmounts or {}
 
     -- Set handler name
     self.HandlerName = InterfaceNodeHandler.HandlerName

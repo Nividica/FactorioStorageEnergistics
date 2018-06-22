@@ -17,7 +17,8 @@ function AddCountToSlot(slot, count)
       type = "label",
       name = "count_tl_shadow",
       caption = countStr,
-      style = label_style
+      style = label_style,
+      ignored_by_interaction = true
     }
   )
   tlShadow.style.top_padding = vert_center - 1
@@ -32,7 +33,8 @@ function AddCountToSlot(slot, count)
       type = "label",
       name = "count_br_shadow",
       caption = countStr,
-      style = label_style
+      style = label_style,
+      ignored_by_interaction = true
     }
   )
   brShadow.style.top_padding = vert_center + 1
@@ -47,7 +49,8 @@ function AddCountToSlot(slot, count)
       type = "label",
       name = "count",
       caption = countStr,
-      style = label_style
+      style = label_style,
+      ignored_by_interaction = true
     }
   )
   numLabel.style.top_padding = vert_center

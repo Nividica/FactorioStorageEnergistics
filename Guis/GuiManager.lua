@@ -290,7 +290,7 @@ return function()
 
     for guiHandler, guiObject in pairs(handlerMap) do
       -- Inform the GUI
-      guiHandler.OnPlayerClicked(guiObject, player, event.element)
+      guiHandler.OnPlayerClicked(guiObject, player, event)
     end
   end
 
