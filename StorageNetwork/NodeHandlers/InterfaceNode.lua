@@ -166,9 +166,9 @@ return function(BaseHandler)
     if (otherNode) then
       -- Network node
       CopyNodeFilters(self, otherNode)
-    elseif (sourceEntity.recipe) then
+    elseif (sourceEntity.get_recipe() ~= nil) then
       -- Crafting machine
-      SetFiltersFromRecipe(self, sourceEntity.recipe)
+      SetFiltersFromRecipe(self, sourceEntity.get_recipe())
     end
   end
 

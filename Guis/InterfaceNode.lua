@@ -28,7 +28,12 @@ return function(BaseGUI)
   -- Sets the slider to the nearest step
   local function SetSliderValue(self, amount)
     -- Is there no selection?
-    if (self.SelectedIndex == 0) then
+    local noSelection = (self.SelectedIndex == 0)
+
+    -- Enable/Disable
+    self.AmountSlider.enabled = not noSelection
+
+    if (noSelection) then
       -- Reset
       self.AmountSlider.slider_value = 1
       return
@@ -47,7 +52,13 @@ return function(BaseGUI)
   -- Set the text shown in the amount field
   local function SetAmountText(self, text)
     -- Is there no selection?
-    if (self.SelectedIndex == 0) then
+    local noSelection = (self.SelectedIndex == 0)
+
+    -- Enable/Disable
+    self.AmountTextfield.enabled = not noSelection
+
+    -- Is there no selection?
+    if (noSelection) then
       text = "1"
     end
 
@@ -235,6 +246,7 @@ return function(BaseGUI)
         value = 1
       }
     )
+    self.AmountSlider.enabled = false
 
     self.AmountTextfield =
       sliderContainer.add(
@@ -245,6 +257,7 @@ return function(BaseGUI)
         text = "1"
       }
     )
+    self.AmountTextfield.enabled = false
 
     return true
   end
