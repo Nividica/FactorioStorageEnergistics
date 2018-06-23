@@ -6,6 +6,8 @@
 return function()
   local SENetwork = {}
 
+  require "Utils/Library"
+
   -- NewNetwork( Int, Int ) :: Network
   -- Creates a new SENetwork with the given ID and wire type.
   function SENetwork.NewNetwork(networkID, wireType)
@@ -368,8 +370,9 @@ return function()
   -- stack: The items to transfer
   -- transferFn: Function name to call on each nodes handler to transfer items.
   -- requesterNode: Node that requested the transfer
+  -- filterFn: Function to filter storage nodes with
   -- Returns: Amount transfered
-  local function TransferItems(network, stack, transferFn, requesterNode)
+  local function TransferItems(network, stack, transferFn, requesterNode, filterFn)
     -- Copy the stack amount
     local itemsToTransfer = stack.count
 
@@ -387,7 +390,7 @@ return function()
     -- Assume not all can be transfered
     local reasoncode = TransferReasonCodes.NotAllTransfered
 
-    for node, handler in pairs(network.StorageNodes) do
+    for node, handler in fpairs(network.StorageNodes, filterFn) do
       local simTransfered = handler[transferFn](node, adjustedStack, true)
 
       -- Can any be transfered?
@@ -425,13 +428,21 @@ return function()
     return {Amount = totalAmountTransfered, ReasonCode = reasoncode}
   end
 
+  local FilterStorage_RW = function(node, handler)
+    return (not handler.IsReadOnly(node))
+  end
+
+  local FilterStorage_RO = function(node, handler)
+    return handler.IsReadOnly(node)
+  end
+
   -- InsertItems( Self, SimpleItemStack, Node ) :: uint
   -- Attempts to insert the items.
   -- If the network does not have enough power to insert all the items
   -- as many will be inserted as possible.
   -- Returns the amount inserted
   function SENetwork:InsertItems(stack, requesterNode)
-    local transfer = TransferItems(self, stack, "InsertItems", requesterNode)
+    local transfer = TransferItems(self, stack, "InsertItems", requesterNode, FilterStorage_RW)
 
     -- Is the network full?
     if (transfer.ReasonCode == TransferReasonCodes.NotAllTransfered) then
@@ -449,7 +460,26 @@ return function()
   -- as many will be extracted as possible.
   -- Returns the amount extracted.
   function SENetwork:ExtractItems(stack, requesterNode)
-    return TransferItems(self, stack, "ExtractItems", requesterNode).Amount
+    -- Attempt to extract all needed from Read/Write chests
+    local transfer = TransferItems(self, stack, "ExtractItems", requesterNode, FilterStorage_RW)
+
+    --If not all transfered extract from Read-Only chests
+    if (transfer.ReasonCode == TransferReasonCodes.NotAllTransfered) then
+      -- Temporarily adjust stack count
+      local pCount = stack.count
+      stack.count = stack.count - transfer.Amount
+
+      -- Attempt to extract reminaing
+      local t2 = TransferItems(self, stack, "ExtractItems", requesterNode, FilterStorage_RO)
+
+      -- Updated amount transfered
+      transfer.Amount = transfer.Amount + t2.Amount
+
+      -- Restore stack count
+      stack.count = pCount
+    end
+
+    return transfer.Amount
   end
 
   -- GetStorageContents( Self ) :: Map( item name -> count)

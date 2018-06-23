@@ -26,16 +26,16 @@ return function(BaseGUI)
   SliderSteps[#SliderSteps + 1] = 20000
 
   -- Sets the slider to the nearest step
-  local function SetSliderValue(self, amount)
+  local function SetSliderValue(guiData, amount)
     -- Is there no selection?
-    local noSelection = (self.SelectedIndex == 0)
+    local noSelection = (guiData.SelectedIndex == 0)
 
     -- Enable/Disable
-    self.AmountSlider.enabled = not noSelection
+    guiData.AmountSlider.enabled = not noSelection
 
     if (noSelection) then
       -- Reset
-      self.AmountSlider.slider_value = 1
+      guiData.AmountSlider.slider_value = 1
       return
     end
 
@@ -46,47 +46,47 @@ return function(BaseGUI)
         step = stepIdx
       end
     end
-    self.AmountSlider.slider_value = step
+    guiData.AmountSlider.slider_value = step
   end
 
   -- Set the text shown in the amount field
-  local function SetAmountText(self, text)
+  local function SetAmountText(guiData, text)
     -- Is there no selection?
-    local noSelection = (self.SelectedIndex == 0)
+    local noSelection = (guiData.SelectedIndex == 0)
 
     -- Enable/Disable
-    self.AmountTextfield.enabled = not noSelection
+    guiData.AmountTextfield.enabled = not noSelection
 
     -- Is there no selection?
     if (noSelection) then
       text = "1"
     end
 
-    self.AmountTextfield.text = text or ""
-    self.PreviousAmountText = self.AmountTextfield.text
+    guiData.AmountTextfield.text = text or ""
+    guiData.PreviousAmountText = guiData.AmountTextfield.text
   end
 
   -- Sets which slot is selected
-  local function SetSelectedIndex(self, index)
+  local function SetSelectedIndex(guiData, index)
     local filterAmount = 0
 
     -- Was there a slot selected previously?
-    if (self.SelectedIndex > 0) then
-      local prevSelectedSlot = self.Slots[self.SelectedIndex]
+    if (guiData.SelectedIndex > 0) then
+      local prevSelectedSlot = guiData.Slots[guiData.SelectedIndex]
       -- Set un-highlighted
       prevSelectedSlot.style = "slot_button"
 
       -- Lock if has filter, unlock if does not
-      prevSelectedSlot.locked = (self.Node.RequestFilters[self.SelectedIndex] ~= nil)
+      prevSelectedSlot.locked = (guiData.Node.RequestFilters[guiData.SelectedIndex] ~= nil)
     end
 
     -- Selecting a slot?
     if (index > 0) then
       -- Get the slot
-      local slot = self.Slots[index]
+      local slot = guiData.Slots[index]
 
       -- Get the filter
-      local filter = self.Node.RequestFilters[index]
+      local filter = guiData.Node.RequestFilters[index]
       if (filter ~= nil) then
         filterAmount = filter.Amount
 
@@ -97,21 +97,21 @@ return function(BaseGUI)
     end
 
     -- Store the index
-    self.SelectedIndex = index
+    guiData.SelectedIndex = index
 
     -- Set slider
-    SetSliderValue(self, filterAmount)
+    SetSliderValue(guiData, filterAmount)
 
     -- Set amount
-    SetAmountText(self, (filterAmount > 0 and tostring(filterAmount)) or "")
+    SetAmountText(guiData, (filterAmount > 0 and tostring(filterAmount)) or "")
   end
 
   -- Sets the filter and slot
-  local function SetFilter(self, index, filter)
+  local function SetFilter(guiData, index, filter)
     -- Set filter
-    self.Node.RequestFilters[index] = filter
+    guiData.Node.RequestFilters[index] = filter
 
-    local slot = self.Slots[index]
+    local slot = guiData.Slots[index]
     if (filter ~= nil) then
       -- Update slot
       slot.elem_value = filter.Item
@@ -122,8 +122,8 @@ return function(BaseGUI)
       UpdateSlotCount(slot, nil)
 
       -- If this slot was selected, remove selection
-      if (index == self.SelectedIndex) then
-        SetSelectedIndex(self, 0)
+      if (index == guiData.SelectedIndex) then
+        SetSelectedIndex(guiData, 0)
       else
         -- Ensure empty slots are unlocked
         slot.locked = false
@@ -132,17 +132,17 @@ return function(BaseGUI)
   end
 
   -- Sets the amount for the currently selected item
-  local function SetFilterAmount(self, amount)
+  local function SetFilterAmount(guiData, amount)
     -- Slot with filter selected?
-    if ((self.SelectedIndex == 0) or (self.Node.RequestFilters[self.SelectedIndex] == nil)) then
+    if ((guiData.SelectedIndex == 0) or (guiData.Node.RequestFilters[guiData.SelectedIndex] == nil)) then
       return
     end
 
     -- Set the filter amount
-    self.Node.RequestFilters[self.SelectedIndex].Amount = amount or 0
+    guiData.Node.RequestFilters[guiData.SelectedIndex].Amount = amount or 0
 
     -- Update label
-    UpdateSlotCount(self.Slots[self.SelectedIndex], amount)
+    UpdateSlotCount(guiData.Slots[guiData.SelectedIndex], amount)
   end
 
   -- @See BaseGUI:OnShow

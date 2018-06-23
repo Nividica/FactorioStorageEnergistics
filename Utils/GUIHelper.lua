@@ -1,3 +1,8 @@
+-- This file is part of Storage Energistics
+-- Author: Nividica
+-- Created: 2018-06-22
+-- Description: Provides helper function for interacting with a GUI
+
 require "Utils/Strings"
 
 -- AddCountToSlot( LuaGuiElement ) :: void

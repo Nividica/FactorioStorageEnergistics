@@ -36,12 +36,7 @@ return function(BaseHandler)
 
     -- Copy the filters
     for _, filter in pairs(sFilters) do
-      -- Determine how many GUI slots this will occupy
-      local reqSlots = math.ceil(amount / SE.StackSizeCache[item])
-      -- Add gui slots
-      for i = 1, reqSlots do
-        table.insert(node.RequestFilters, {Item = filter.Item, Amount = filter.Amount})
-      end
+      table.insert(node.RequestFilters, {Item = filter.Item, Amount = filter.Amount})
     end
   end
 

@@ -103,6 +103,11 @@ return function(BaseHandler)
     return StorageNodeHandler.EnsureStructure(BaseHandler.NewNode(entity))
   end
 
+  -- Returns if the node is read only or not
+  function StorageNodeHandler:IsReadOnly()
+    return self.ReadOnlyMode
+  end
+
   -- @See BaseNode:EnsureStructure
   function StorageNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
