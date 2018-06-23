@@ -10,33 +10,92 @@ return function(BaseGUI)
 
   require "Utils/GUIHelper"
 
-  -- Removes the selection highlight
-  local function RemoveSelection(self)
-    if (self.SelectedIndex > 0) then
-      local prevSelectedSlot = self.Slots[self.SelectedIndex]
-      prevSelectedSlot.style = "slot_button"
-      prevSelectedSlot.locked = (self.Node.RequestFilters[self.SelectedIndex] ~= nil)
-      self.SelectedIndex = 0
+  local SliderSteps = {}
+  for sldIdx = 1, 9 do
+    -- 1s
+    SliderSteps[sldIdx] = sldIdx
+    -- 10s
+    SliderSteps[sldIdx + 9] = sldIdx * 10
+    -- 100s
+    SliderSteps[sldIdx + 18] = sldIdx * 100
+    -- 1000s
+    SliderSteps[sldIdx + 27] = sldIdx * 1000
+  end
+  -- 10 and 20 thousand
+  SliderSteps[#SliderSteps + 1] = 10000
+  SliderSteps[#SliderSteps + 1] = 20000
+
+  -- Sets the slider to the nearest step
+  local function SetSliderValue(self, amount)
+    -- Is there no selection?
+    if (self.SelectedIndex == 0) then
+      -- Reset
+      self.AmountSlider.slider_value = 1
+      return
     end
+
+    -- Local the nearest step, rounded down
+    local step = 1
+    for stepIdx = 1, #SliderSteps do
+      if (amount >= SliderSteps[stepIdx]) then
+        step = stepIdx
+      end
+    end
+    self.AmountSlider.slider_value = step
   end
 
-  -- Sets the selection highlight
-  local function SetSelection(self, index)
-    RemoveSelection(self)
+  -- Set the text shown in the amount field
+  local function SetAmountText(self, text)
+    -- Is there no selection?
+    if (self.SelectedIndex == 0) then
+      text = "1"
+    end
 
-    if (self.Node.RequestFilters[index] ~= nil) then
-      -- Set selected index
-      self.SelectedIndex = index
+    self.AmountTextfield.text = text or ""
+    self.PreviousAmountText = self.AmountTextfield.text
+  end
 
+  -- Sets which slot is selected
+  local function SetSelectedIndex(self, index)
+    local filterAmount = 0
+
+    -- Was there a slot selected previously?
+    if (self.SelectedIndex > 0) then
+      local prevSelectedSlot = self.Slots[self.SelectedIndex]
+      -- Set un-highlighted
+      prevSelectedSlot.style = "slot_button"
+
+      -- Lock if has filter, unlock if does not
+      prevSelectedSlot.locked = (self.Node.RequestFilters[self.SelectedIndex] ~= nil)
+    end
+
+    -- Selecting a slot?
+    if (index > 0) then
       -- Get the slot
       local slot = self.Slots[index]
 
-      -- Set highlighted and unlocked
-      slot.style = "selected_slot_button"
-      slot.locked = false
+      -- Get the filter
+      local filter = self.Node.RequestFilters[index]
+      if (filter ~= nil) then
+        filterAmount = filter.Amount
+
+        -- Set highlighted and unlocked
+        slot.style = "selected_slot_button"
+        slot.locked = false
+      end
     end
+
+    -- Store the index
+    self.SelectedIndex = index
+
+    -- Set slider
+    SetSliderValue(self, filterAmount)
+
+    -- Set amount
+    SetAmountText(self, (filterAmount > 0 and tostring(filterAmount)) or "")
   end
 
+  -- Sets the filter and slot
   local function SetFilter(self, index, filter)
     -- Set filter
     self.Node.RequestFilters[index] = filter
@@ -53,7 +112,7 @@ return function(BaseGUI)
 
       -- If this slot was selected, remove selection
       if (index == self.SelectedIndex) then
-        RemoveSelection(self)
+        SetSelectedIndex(self, 0)
       else
         -- Ensure empty slots are unlocked
         slot.locked = false
@@ -61,9 +120,30 @@ return function(BaseGUI)
     end
   end
 
+  -- Sets the amount for the currently selected item
+  local function SetFilterAmount(self, amount)
+    -- Slot with filter selected?
+    if ((self.SelectedIndex == 0) or (self.Node.RequestFilters[self.SelectedIndex] == nil)) then
+      return
+    end
+
+    -- Set the filter amount
+    self.Node.RequestFilters[self.SelectedIndex].Amount = amount or 0
+
+    -- Update label
+    UpdateSlotCount(self.Slots[self.SelectedIndex], amount)
+  end
+
   -- @See BaseGUI:OnShow
   function InterfaceNodeGUI:OnShow(player)
+    local SLOT_COUNT = 12
+
+    -- Create properties
+    self.Slots = {}
     self.SelectedIndex = 0
+    self.PreviousAmountText = "1"
+    self.AmountSlider = nil
+    self.AmountTextfield = nil
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
@@ -86,23 +166,33 @@ return function(BaseGUI)
     )
     frame.style.title_bottom_padding = 6
 
-    -- Create the inner body
+    -- Create the body
     local body =
       frame.add(
       {
-        type = "table",
+        type = "flow",
         name = "body",
-        column_count = 5
+        direction = "vertical",
+        style = "vertical_flow"
+      }
+    )
+
+    -- Create the inventory table
+    local invTable =
+      body.add(
+      {
+        type = "table",
+        name = "invTable",
+        column_count = math.ceil(SLOT_COUNT / 2.0)
       }
     )
 
     -- Add selection slots
-    self.Slots = {}
     local filters = self.Node.RequestFilters
-    for idx = 1, 10 do
+    for idx = 1, SLOT_COUNT do
       -- Add slot
       self.Slots[idx] =
-        body.add(
+        invTable.add(
         {
           type = "choose-elem-button",
           name = SE.Constants.Names.Gui.InterfaceItemSelectionElement .. tostring(idx),
@@ -117,10 +207,44 @@ return function(BaseGUI)
     end
 
     -- Slots can only be locked after being added
-    for idx = 1, 10 do
+    for idx = 1, SLOT_COUNT do
       -- Lock a slot if it has a filter and it is not the selected slot
       self.Slots[idx].locked = (filters[idx] ~= nil) and (idx ~= self.SelectedIndex)
     end
+
+    -- Add slider container
+    local sliderContainer =
+      body.add(
+      {
+        type = "flow",
+        name = "slider-container",
+        direction = "horizontal",
+        style = "horizontal_flow"
+      }
+    )
+
+    -- Add slider and input
+    self.AmountSlider =
+      sliderContainer.add(
+      {
+        type = "slider",
+        name = "amount-slider",
+        style = "se_logistics_slider",
+        minimum_value = 1,
+        maximum_value = #SliderSteps,
+        value = 1
+      }
+    )
+
+    self.AmountTextfield =
+      sliderContainer.add(
+      {
+        type = "textfield",
+        name = "amount-input",
+        style = "se_logistics_textfield",
+        text = "1"
+      }
+    )
 
     return true
   end
@@ -144,7 +268,7 @@ return function(BaseGUI)
       SetFilter(self, index, {Item = element.elem_value, Amount = 1})
 
       -- Select button
-      SetSelection(self, index)
+      SetSelectedIndex(self, index)
     else
       -- Clear filter
       SetFilter(self, index, nil)
@@ -168,15 +292,74 @@ return function(BaseGUI)
           if (event.button == defines.mouse_button_type.right) then
             -- Clear the slot
             SetFilter(self, clickedIdx, nil)
+
+            -- Clear selection
+            SetSelectedIndex(self, 0)
           else
             -- Select the slot
-            SetSelection(self, clickedIdx)
+            SetSelectedIndex(self, clickedIdx)
           end
-        end
+        end -- end Has filter?
+      end -- end clickedIdx ~= self.SelectedIndex
+    end -- end Is elem button?
+  end
 
-      -- Do things with slider!
-      end
+  -- @See BaseGUI:OnPlayerChangedText
+  function InterfaceNodeGUI:OnPlayerChangedText(player, element)
+    -- Is there no selection?
+    if (self.SelectedIndex == 0) then
+      -- Reset
+      element.text = "1"
+      self.PreviousAmountText = "1"
+      return
     end
+
+    -- Get the text
+    local currentText = element.text
+
+    local amount = 0
+
+    -- Is the text not empty?
+    if (currentText ~= "") then
+      -- Convert text to a number
+      amount = tonumber(currentText)
+
+      -- Is the amount valid?
+      if (amount == nil) then
+        -- Not numeric, restore last text
+        element.text = self.PreviousAmountText
+        return
+      end
+
+      -- Is numeric, clamp to range
+      amount = math.max(math.min(amount, 20000), 0)
+      SetAmountText(self, tostring(amount))
+    end
+
+    -- Update slider
+    SetSliderValue(self, amount)
+
+    -- Update filter
+    SetFilterAmount(self, amount)
+  end
+
+  -- @See BaseGUI:OnPlayerChangedSlider
+  function InterfaceNodeGUI:OnPlayerChangedSlider(player, element)
+    -- Is there no selection?
+    if (self.SelectedIndex == 0) then
+      -- Reset
+      element.slider_value = 1
+      return
+    end
+
+    -- Get the amount
+    local amount = SliderSteps[math.floor(element.slider_value)]
+
+    -- Set the field
+    SetAmountText(self, amount)
+
+    -- Update filter
+    SetFilterAmount(self, amount)
   end
 
   return InterfaceNodeGUI

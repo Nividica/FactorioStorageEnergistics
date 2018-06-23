@@ -129,28 +129,30 @@ return function(BaseHandler)
 
     -- Add requested
     for itemName, Amount in pairs(toAdd) do
-      -- Create a simple stack
-      local stack = {name = itemName, count = Amount}
-      -- Perform a fake insert to get how many can be inserted
-      local canBeInserted = inv.insert(stack)
-      -- Can any be inserted
-      if (canBeInserted > 0) then
-        stack.count = canBeInserted
-        -- Remove fake insert
-        inv.remove(stack)
-        --SE.Logger.Trace("Attempting to add " .. tostring(stack.count) .. " " .. itemName)
+      if (Amount > 0) then
+        -- Create a simple stack
+        local stack = {name = itemName, count = Amount}
+        -- Perform a fake insert to get how many can be inserted
+        local canBeInserted = inv.insert(stack)
+        -- Can any be inserted
+        if (canBeInserted > 0) then
+          stack.count = canBeInserted
+          -- Remove fake insert
+          inv.remove(stack)
+          --SE.Logger.Trace("Attempting to add " .. tostring(stack.count) .. " " .. itemName)
 
-        -- Attempt network extraction
-        local extractedAmount = SE.NetworkHandler.ExtractItems(network, stack, self)
-        if (extractedAmount > 0) then
-          -- Add to inventory
-          stack.count = extractedAmount
-          inv.insert(stack)
-        end
-      --else
-      --SE.Logger.Trace("Not enough inventory space to add any " .. itemName)
-      end
-    end
+          -- Attempt network extraction
+          local extractedAmount = SE.NetworkHandler.ExtractItems(network, stack, self)
+          if (extractedAmount > 0) then
+            -- Add to inventory
+            stack.count = extractedAmount
+            inv.insert(stack)
+          end
+        --else
+        --SE.Logger.Trace("Not enough inventory space to add any " .. itemName)
+        end -- end canBeInserted
+      end -- end Amount >0
+    end -- end for(toAdd)
   end
 
   -- @See BaseNode:OnPlayerOpenedNode

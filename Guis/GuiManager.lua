@@ -294,6 +294,46 @@ return function()
     end
   end
 
+  -- OnTextChanged( Event ) :: void
+  -- Event fields:
+  -- element :: LuaGuiElement
+  -- player_index :: uint
+  function SEGuiManager.OnTextChanged(event)
+    -- Get the player
+    local player = game.players[event.player_index]
+
+    -- Get the handler map
+    local handlerMap = OpenedGuis[player.index]
+    if (handlerMap == nil) then
+      return
+    end
+
+    for guiHandler, guiObject in pairs(handlerMap) do
+      -- Inform the GUI
+      guiHandler.OnPlayerChangedText(guiObject, player, event.element)
+    end
+  end
+
+  -- OnSliderChanged( Event ) :: void
+  -- Event fields:
+  -- element :: LuaGuiElement
+  -- player_index :: uint
+  function SEGuiManager.OnSliderChanged(event)
+    -- Get the player
+    local player = game.players[event.player_index]
+
+    -- Get the handler map
+    local handlerMap = OpenedGuis[player.index]
+    if (handlerMap == nil) then
+      return
+    end
+
+    for guiHandler, guiObject in pairs(handlerMap) do
+      -- Inform the GUI
+      guiHandler.OnPlayerChangedSlider(guiObject, player, event.element)
+    end
+  end
+
   -- RegisterWithGame() :: void
   -- Called to register the handler events
   function SEGuiManager.RegisterWithGame()
@@ -301,6 +341,8 @@ return function()
     script.on_event(defines.events.on_gui_checked_state_changed, SEGuiManager.OnCheckboxChanged)
     script.on_event(defines.events.on_gui_selection_state_changed, SEGuiManager.OnDropDownChanged)
     script.on_event(defines.events.on_gui_click, SEGuiManager.OnElementClicked)
+    script.on_event(defines.events.on_gui_text_changed, SEGuiManager.OnTextChanged)
+    script.on_event(defines.events.on_gui_value_changed, SEGuiManager.OnSliderChanged)
   end
 
   -- OnPlayerJoinedGame( LuaPlayer ) :: void

@@ -67,5 +67,15 @@ return function()
   function BaseGUI:OnPlayerClicked(player, event)
   end
 
+  -- OnPlayerChangedText( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- Called when the player types in a text element
+  function BaseGUI:OnPlayerChangedText(player, element)
+  end
+
+  -- OnPlayerChangedSlider( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- Called when the player moves a slider
+  function BaseGUI:OnPlayerChangedSlider(player, element)
+  end
+
   return BaseGUI
 end

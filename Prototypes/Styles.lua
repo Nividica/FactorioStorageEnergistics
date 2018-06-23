@@ -16,3 +16,17 @@ guiStyles["se_horizontal_line"] = {
   parent = "progressbar",
   smooth_color = default_orange_color
 }
+
+guiStyles["se_logistics_slider"] = {
+  type = "slider_style",
+  parent = "slider",
+  width = 167,
+  height = 19,
+  top_padding = 5
+}
+
+guiStyles["se_logistics_textfield"] = {
+  type = "textfield_style",
+  parent = "textfield",
+  width = 50
+}
