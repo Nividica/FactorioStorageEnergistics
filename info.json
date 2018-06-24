@@ -3,9 +3,11 @@
   "version": "0.0.9",
   "title": "Storage Energistics",
   "author": "Nividica",
+  "contact": "Nividica@gmail.com",
   "description": "Digitally store and transfer items via the circuit network!",
+  "homepage": "https://github.com/Nividica/FactorioStorageEnergistics/wiki",
   "factorio_version": "0.16",
   "dependencies": [
-    "base >= 0.16"
+    "base >= 0.16.0"
   ]
 }
