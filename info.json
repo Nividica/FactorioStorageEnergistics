@@ -5,7 +5,7 @@
   "author": "Nividica",
   "contact": "Nividica@gmail.com",
   "description": "Digitally store and transfer items via the circuit network!",
-  "homepage": "https://github.com/Nividica/FactorioStorageEnergistics/wiki",
+  "homepage": "https://forums.factorio.com/viewtopic.php?f=190&t=61160",
   "factorio_version": "0.16",
   "dependencies": [
     "base >= 0.16.0"
