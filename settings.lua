@@ -26,7 +26,7 @@ data:extend(
       type = "int-setting",
       name = "storage_energistics-transfer_power_drain-per_chunk-in_watts",
       setting_type = "runtime-global",
-      default_value = 300,
+      default_value = 1000,
       minimum_value = 1,
       order = "a-c"
     },

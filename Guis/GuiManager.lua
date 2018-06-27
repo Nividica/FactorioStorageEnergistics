@@ -100,7 +100,7 @@ return function()
     elseif (nodeInfo == nil and player.opened ~= nil) then
       -- Nothing was opened, but now something is
       -- Does the player have an entity opened?
-      if (type(player.opened) == "table" and player.opened.direction ~= nil) then
+      if (player.opened_gui_type == defines.gui_type.entity and type(player.opened) == "table" and player.opened.direction ~= nil) then
         -- Check the entity
         OpenedNodes[playerIndex] = OnOpenEntity(player)
       else

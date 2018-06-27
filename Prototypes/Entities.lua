@@ -33,8 +33,8 @@ data:extend(
       selection_box = {{-1, -1}, {1, 1}},
       energy_source = {
         type = "electric",
-        usage_priority = "secondary-input",
-        input_flow_limit = "500kW",
+        usage_priority = "terciary",
+        input_flow_limit = "0W",
         output_flow_limit = "0W",
         buffer_capacity = "5MJ"
       },
@@ -81,6 +81,35 @@ data:extend(
       circuit_wire_max_distance = 9,
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.7},
       map_color = {r = 0.61, g = 0.23, b = 0.64}
+    },
+    {
+      type = "electric-energy-interface",
+      name = "hidden_" .. SEConstants.Names.Proto.EnergyAcceptor.Entity,
+      icon = SEConstants.DataPaths.Icons .. "SE_EnergyAcceptor.png",
+      icon_size = 32,
+      flags = {},
+      max_health = 150,
+      indestructible = true,
+      collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+      selection_box = {{-1, -1}, {1, 1}},
+      selectable_in_game = false,
+      energy_source = {
+        type = "electric",
+        buffer_capacity = "5MJ",
+        usage_priority = "secondary-input",
+        input_flow_limit = "500kW",
+        output_flow_limit = "0kW"
+      },
+      energy_production = "0kW",
+      energy_usage = "0kW",
+      picture = {
+        filename = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk1.png",
+        priority = "extra-high",
+        width = 32,
+        height = 32,
+        shift = {0, 0}
+      },
+      order = "h-e-e-i"
     },
     -- Controller
     {

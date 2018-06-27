@@ -71,7 +71,10 @@ return function()
   -- GetCircuitNetwork( Self, WireType ) :: LuaCircuitNetwork
   -- Returns the circuit network or nil
   function BaseNodeHandler:GetCircuitNetwork(wireType)
-    return self.Entity.get_circuit_network(wireType)
+    if (BaseNodeHandler.Valid(self)) then
+      return self.Entity.get_circuit_network(wireType)
+    end
+    return nil
   end
 
   -- IsFiltered(self :: Node, type :: string) :: bool
@@ -128,6 +131,11 @@ return function()
   -- Called when pasting the settings of another entity
   function BaseNodeHandler:OnPasteSettings(sourceEntity, player)
     --player.print("Would get settings from entity " .. sourceEntity.name)
+  end
+
+  -- OnDestroy( Self ) :: void
+  -- The entity is going away
+  function BaseNodeHandler:OnDestroy()
   end
 
   -- NewNode( LuaEntity ) :: Node

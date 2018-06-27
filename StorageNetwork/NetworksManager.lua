@@ -75,6 +75,11 @@ return function()
     --SE.Logger.Trace("Networks: Removing node")
     local node = Nodes[idx]
 
+    local nodeHandler = SE.NodeHandlers.GetNodeHandler(node)
+
+    -- Inform the node
+    nodeHandler.OnDestroy(node)
+
     -- Remove from networks
     local network = NetworksManager.GetNetworkForNode(node, defines.wire_type.green)
     if (network ~= nil) then
@@ -93,7 +98,7 @@ return function()
     table.remove(Nodes, idx)
 
     -- Does the node tick?
-    if (SE.NodeHandlers.GetNodeHandler(node).NeedsTicks) then
+    if (nodeHandler.NeedsTicks) then
       -- Remove from ticking
       TickingNodes[node] = nil
     end

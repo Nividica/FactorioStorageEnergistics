@@ -129,13 +129,13 @@ return function()
   function SENetwork:NetworkTick()
     if (not self.HasPower) then
       -- Not enough power to run network
-      SE.Logger.Trace("Not enough power for network " .. tostring(self.NetworkID))
+      --SE.Logger.Trace("Not enough power for network " .. tostring(self.NetworkID))
       return
     end
 
     -- Network requires at least 1 controller to tick devices
     if (next(self.ControllerNodes) == nil) then
-      SE.Logger.Trace("Missing controller(s) on network " .. tostring(self.NetworkID))
+      --SE.Logger.Trace("Missing controller(s) on network " .. tostring(self.NetworkID))
       return
     end
 
@@ -373,59 +373,69 @@ return function()
   -- filterFn: Function to filter storage nodes with
   -- Returns: Amount transfered
   local function TransferItems(network, stack, transferFn, requesterNode, filterFn)
-    -- Copy the stack amount
-    local itemsToTransfer = stack.count
-
     -- Is the amount valid?
-    if (itemsToTransfer <= 0) then
-      return 0
+    if (stack.count <= 0) then
+      return {Amount = 0, ReasonCode = TransferReasonCodes.Ok}
     end
 
-    -- Create a new stack with adjusted amount
-    local adjustedStack = {name = stack.name, count = itemsToTransfer}
+    -- Amount left to transfer
+    local stackRemaining = {name = stack.name, count = stack.count}
 
-    -- Attempt to transfer all items
-    local totalAmountTransfered = 0
+    -- Amount attempting to be transfered
+    local stackTransfering = {name = stack.name, count = 0}
 
     -- Assume not all can be transfered
     local reasoncode = TransferReasonCodes.NotAllTransfered
 
     for node, handler in fpairs(network.StorageNodes, filterFn) do
-      local simTransfered = handler[transferFn](node, adjustedStack, true)
+      -- Simulate a transfer
+      stackTransfering.count = handler[transferFn](node, stackRemaining, true)
 
       -- Can any be transfered?
-      if (simTransfered > 0) then
-        -- Calculate power
-        local reqPower = (simTransfered * SE.Settings.PowerPerItem)
+      if (stackTransfering.count > 0) then
         -- Calculate Manhattan distance based on chunks
-        reqPower =
-          reqPower +
+        local chunkPower =
           ((math.abs(node.ChunkPosition.x - requesterNode.ChunkPosition.x) + math.abs((node.ChunkPosition.y - requesterNode.ChunkPosition.y))) *
-            (SE.Settings.PowerPerChunk * simTransfered))
+          SE.Settings.PowerPerChunk)
 
-        -- Can the power be extracted?
-        if (SENetwork.ExtractPower(network, reqPower)) then
-          -- Transfer
-          handler[transferFn](node, adjustedStack, false)
+        -- Transfer as many items as possible
+        while (stackTransfering.count > 0) do
+          -- Calculate power
+          local itemPower = (stackTransfering.count * SE.Settings.PowerPerItem) * 50
 
-          -- Adjust amounts
-          totalAmountTransfered = totalAmountTransfered + simTransfered
-          adjustedStack.count = adjustedStack.count - simTransfered
+          -- Attempt to extract the power
+          if (SENetwork.ExtractPower(network, itemPower + chunkPower)) then
+            -- Power request successful
+            -- Transfer
+            handler[transferFn](node, stackTransfering, false)
 
-          -- All done?
-          if (adjustedStack.count == 0) then
-            reasoncode = TransferReasonCodes.Ok
+            -- Adjust amount
+            stackRemaining.count = stackRemaining.count - stackTransfering.count
+
+            -- Done with this node
             break
           end
-        else
-          -- Not enough power, end here
+          -- Not enough power, half the request and try again
           reasoncode = TransferReasonCodes.LowPower
+          stackTransfering.count = math.floor(stackTransfering.count / 2.0)
+        end
+
+        -- Could none be transfered or no more power?
+        if (reasoncode == TransferReasonCodes.LowPower or stackTransfering.count == 0) then
+          -- Exit for loop
+          break
+        end
+
+        -- Have all items been transfered?
+        if (stackRemaining.count == 0) then
+          -- All done!
+          reasoncode = TransferReasonCodes.Ok
           break
         end
       end
     end
     --
-    return {Amount = totalAmountTransfered, ReasonCode = reasoncode}
+    return {Amount = stack.count - stackRemaining.count, ReasonCode = reasoncode}
   end
 
   local FilterStorage_RW = function(node, handler)
