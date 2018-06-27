@@ -162,11 +162,10 @@ return function()
     self.HandlerName = self.HandlerName or BaseNodeHandler.HandlerName
 
     -- Calculate chunk position
-    if (self.ChunkPosition == nil) then
-      self.ChunkPosition = BaseNodeHandler.GetPosition(self)
-      self.ChunkPosition.x = self.ChunkPosition.x / 32
-      self.ChunkPosition.y = self.ChunkPosition.y / 32
-    end
+    self.ChunkPosition = BaseNodeHandler.GetPosition(self)
+    self.ChunkPosition.x = math.floor(self.ChunkPosition.x / 32)
+    self.ChunkPosition.y = math.floor(self.ChunkPosition.y / 32)
+
     return self
   end
 

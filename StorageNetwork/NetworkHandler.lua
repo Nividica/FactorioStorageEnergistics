@@ -394,14 +394,16 @@ return function()
       -- Can any be transfered?
       if (stackTransfering.count > 0) then
         -- Calculate Manhattan distance based on chunks
-        local chunkPower =
-          ((math.abs(node.ChunkPosition.x - requesterNode.ChunkPosition.x) + math.abs((node.ChunkPosition.y - requesterNode.ChunkPosition.y))) *
-          SE.Settings.PowerPerChunk)
+        -- Same chunk, and neighbor chunks(including diagonal), do not have increased cost
+
+        local distX = math.abs(node.ChunkPosition.x - requesterNode.ChunkPosition.x)
+        local distY = math.abs(node.ChunkPosition.y - requesterNode.ChunkPosition.y)
+        local chunkPower = (distX > 1 or distY > 1) and ((distX + distY) * SE.Settings.PowerPerChunk) or 0
 
         -- Transfer as many items as possible
         while (stackTransfering.count > 0) do
           -- Calculate power
-          local itemPower = (stackTransfering.count * SE.Settings.PowerPerItem) * 50
+          local itemPower = (stackTransfering.count * SE.Settings.PowerPerItem)
 
           -- Attempt to extract the power
           if (SENetwork.ExtractPower(network, itemPower + chunkPower)) then

@@ -82,6 +82,7 @@ data:extend(
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.7},
       map_color = {r = 0.61, g = 0.23, b = 0.64}
     },
+    -- 'Hidden' energy interface
     {
       type = "electric-energy-interface",
       name = "hidden_" .. SEConstants.Names.Proto.EnergyAcceptor.Entity,
@@ -103,11 +104,11 @@ data:extend(
       energy_production = "0kW",
       energy_usage = "0kW",
       picture = {
-        filename = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk1.png",
-        priority = "extra-high",
-        width = 32,
-        height = 32,
-        shift = {0, 0}
+        filename = SEConstants.DataPaths.EntityGFX .. "SE_EnergyAcceptor.png",
+        priority = "low",
+        width = 124,
+        height = 103,
+        shift = {0.6875, -0.203125}
       },
       order = "h-e-e-i"
     },
