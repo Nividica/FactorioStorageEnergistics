@@ -356,6 +356,12 @@ return function(BaseGUI)
 
   -- @See BaseGui:OnShow
   function NetworkOverviewGUI:OnShow(player)
+    -- Does the player have something else opened?
+    if (player.opened ~= nil) then
+      -- Player has something else open, don't show overview
+      return false
+    end
+
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
 
@@ -363,12 +369,6 @@ return function(BaseGUI)
     if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
       -- Already open, close first
       NetworkOverviewGUI.OnClose(self, player)
-    end
-
-    -- Does the player have something else opened?
-    if (player.opened ~= nil) then
-      -- Player has something else open
-      return false
     end
 
     -- Build the frame
@@ -380,6 +380,9 @@ return function(BaseGUI)
     -- Add tick info
     self.TickCount = 0
 
+    -- Set as opened
+    player.opened = root[SE.Constants.Names.Gui.NetworkFrame]
+
     return true
   end
 
@@ -387,7 +390,13 @@ return function(BaseGUI)
   function NetworkOverviewGUI:OnClose(player)
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
     local frame = root[SE.Constants.Names.Gui.NetworkFrame]
+
     if (frame ~= nil) then
+      -- Remove frame from player opened?
+      if (player.opened == frame) then
+        player.opened = nil
+      end
+
       frame.destroy()
     end
   end
@@ -414,8 +423,9 @@ return function(BaseGUI)
       return false
     end
 
-    if (player.opened ~= nil) then
-      -- Player has opened something else, close this
+    -- Player does not have frame open?
+    if (player.opened ~= player.gui[SE.Constants.Names.Gui.NetworkFrameRoot][SE.Constants.Names.Gui.NetworkFrame]) then
+      -- Player no longer has frame open, close and cleanup
       NetworkOverviewGUI.OnClose(self, player)
       return false
     end
