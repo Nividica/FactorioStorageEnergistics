@@ -1,0 +1,16 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.9.1
+Date: 27. 06. 2018
+  Bugfixes:
+    - Energy buffers can now charge from accumulators.
+    - Fixed opening equipment grid caused a crash.
+    - Restored partial transfer support. If network does not have power to transfer full request, request is reduced until power requirements met.
+    - Network overview is now closed when hitting escape. Thanks for the tip npo6ka!
+  Changes:
+    - Changed provider and requester chest names for clarity.
+    - Chunk distance calculation now include a check for neighbor chunks. If chunk is neighbor, no additional power is required.
+---------------------------------------------------------------------------------------------------
+Version: 0.9.0
+Date: 24. 06. 2018
+  Changes:
+    - Initial release.

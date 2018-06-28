@@ -11,11 +11,15 @@ return function(BaseHandler)
   }
   setmetatable(EnergyAcceptorNodeHandler, {__index = BaseHandler})
 
-  function EnergyAcceptorNodeHandler:GetCircuitNetwork(wireType)
-    if (EnergyAcceptorNodeHandler.Valid(self)) then
-      return self.Entity.get_circuit_network(wireType, defines.circuit_connector_id.accumulator)
-    end
-    return nil
+  local CreateHiddenEntity = function(node)
+    local entity = node.Entity
+    return entity.surface.create_entity(
+      {
+        name = "hidden_" .. SE.Constants.Names.Proto.EnergyAcceptor.Entity,
+        position = entity.position,
+        force = entity.force
+      }
+    )
   end
 
   -- ExtractPower( Self, uint ) :: uint
@@ -53,33 +57,43 @@ return function(BaseHandler)
     end
   end
 
+  -- @See BaseNode:GetCircuitNetwork
+  function EnergyAcceptorNodeHandler:GetCircuitNetwork(wireType)
+    if (EnergyAcceptorNodeHandler.Valid(self)) then
+      return self.Entity.get_circuit_network(wireType, defines.circuit_connector_id.accumulator)
+    end
+    return nil
+  end
+
+  -- @See BaseNode:OnTick
   function EnergyAcceptorNodeHandler:OnTick()
     -- Tick!
     self.TicksTillUpdate = self.TicksTillUpdate - 1
 
     -- Time to update?
     if (self.TicksTillUpdate < 1) then
-      if (self.HiddenElectricEntity ~= nil and self.HiddenElectricEntity.valid) then
+      -- Ensure the hidden entity has been created
+      if (self.HiddenElectricEntity == nil or (not self.HiddenElectricEntity.valid)) then
+        self.HiddenElectricEntity = CreateHiddenEntity(self)
+      else
         -- Get hidden energy
         local hEng = self.HiddenElectricEntity.energy
         if (hEng ~= self.Entity.energy) then
           -- Set actual energy
           self.Entity.energy = hEng
-          -- 1/4th second
-          self.TickRate = 15
+          -- Tick rate while energy amount changing
+          self.TickRate = 10
         else
-          -- 1 second
-          self.TickRate = 60
+          -- Tick rate while idle
+          self.TickRate = 40
         end
-      else
-        -- Continuiously slow ticks while has invalid entity
-        self.TickRate = self.TickRate + 1
       end
 
       self.TicksTillUpdate = self.TickRate
     end
   end
 
+  -- @See BaseNode:OnDestroy
   function EnergyAcceptorNodeHandler:OnDestroy()
     if (self.HiddenElectricEntity ~= nil) then
       self.HiddenElectricEntity.destroy()
@@ -88,17 +102,7 @@ return function(BaseHandler)
 
   -- @See BaseNode.NewNode
   function EnergyAcceptorNodeHandler.NewNode(entity)
-    -- Create the hidden entity
-    local hiddenPowerInterface =
-      entity.surface.create_entity(
-      {
-        name = "hidden_" .. SE.Constants.Names.Proto.EnergyAcceptor.Entity,
-        position = entity.position,
-        force = entity.force
-      }
-    )
     local node = BaseHandler.NewNode(entity)
-    node.HiddenElectricEntity = hiddenPowerInterface
     EnergyAcceptorNodeHandler.EnsureStructure(node)
     return node
   end
@@ -107,7 +111,6 @@ return function(BaseHandler)
   function EnergyAcceptorNodeHandler:EnsureStructure()
     BaseHandler.EnsureStructure(self)
     self.HandlerName = EnergyAcceptorNodeHandler.HandlerName
-    self.HiddenElectricEntity = self.HiddenElectricEntity or nil
     self.TicksTillUpdate = 5
     self.TickRate = 30
     return self
