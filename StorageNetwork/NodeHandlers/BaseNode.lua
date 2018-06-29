@@ -133,9 +133,16 @@ return function()
     --player.print("Would get settings from entity " .. sourceEntity.name)
   end
 
-  -- OnDestroy( Self ) :: void
+  -- OnPreMined( Self, LuaEntity ) :: void
+  -- miner: The entity doing the mining
+  -- Called when the node is being mined, but not destroyed.
+  function BaseNodeHandler:OnPreMined(miner)
+  end
+
+  -- OnDestroy( Self, [LuaInventory] ) :: void
+  -- inventory: The inventory to save items to.
   -- The entity is going away
-  function BaseNodeHandler:OnDestroy()
+  function BaseNodeHandler:OnDestroy(bufferInventory)
   end
 
   -- NewNode( LuaEntity ) :: Node

@@ -80,6 +80,74 @@ return function(BaseHandler)
     catalog[SE.Constants.Strings.FreeSlots] = (catalog[SE.Constants.Strings.FreeSlots] or 0) + freeSlots
   end
 
+  -- @See BaseNode:OnPreMined
+  function StorageNodeHandler:OnPreMined(miner)
+    -- Get the entity name
+    local entityName = self.Entity.name
+
+    -- Only MK2 can save its inventory
+    local chestMk2 = SE.Constants.Names.Proto.StorageChestMk2
+    local chestMk2Stored = SE.Constants.Names.Proto.StorageChestMk2Stored
+    if (not (entityName == chestMk2.Entity or entityName == chestMk2Stored.Entity)) then
+      self.StorageEntity = nil
+      return
+    end
+
+    -- Get if the entity inventory is empty or not.
+    local entityInventory = self.Entity.get_inventory(defines.inventory.chest)
+    local entityEmpty = entityInventory.is_empty()
+
+    -- Create the item that ultimately represents this chest
+    self.StorageEntity =
+      miner.surface.create_entity {
+      name = "item-on-ground",
+      position = self.Entity.position,
+      force = miner.force,
+      stack = {name = ((entityEmpty and chestMk2.Item) or chestMk2Stored.Item), count = 1}
+    }
+
+    -- Nothing to save?
+    if (entityEmpty) then
+      return
+    end
+
+    local storageInventory = self.StorageEntity.stack.get_inventory(defines.inventory.chest)
+    for idx = 1, #entityInventory do
+      storageInventory[idx].set_stack(entityInventory[idx])
+    end
+
+    -- Clear the contents
+    entityInventory.clear()
+  end
+
+  -- @See BaseNodeHandler:OnDestroy
+  function StorageNodeHandler:OnDestroy(bufferInventory)
+    if (self.StorageEntity ~= nil) then
+      bufferInventory[1].set_stack(self.StorageEntity.stack)
+      self.StorageEntity.destroy()
+    end
+
+    -- Things to save?
+    --if (not entityIsEmpty) then
+    -- Write entity inventory to tag
+    --end
+
+    -- -- Can this entity save it's data?
+    -- if (CanSaveInventory(self)) then
+    --   -- Locate
+    --   for i = 1, #buffer do
+    --     local stack = buffer[i]
+    --     if stack.name == SE.Constants.Names.Proto.StorageChestMk2.Item then
+    --     end
+
+    --     if stack.name == SE.Constants.Names.Proto.StorageChestMk2Stored.Item then
+    --       stack.set_tag("pos-x", entity.position.x)
+    --       stack.set_tag("pos-y", entity.position.y)
+    --     end
+    --   end
+    -- end
+  end
+
   -- OnPasteSettings( Self,  LuaEntity, LuaPlayer ) :: void
   function StorageNodeHandler:OnPasteSettings(sourceEntity, player)
     -- Is this node forced read-only?

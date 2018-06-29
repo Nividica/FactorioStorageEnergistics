@@ -64,6 +64,7 @@ return function()
 
   Names.Proto.PatternBuffer = GenNames("se_pattern_buffer", false)
   Names.Proto.StorageChestMk2 = GenNames("se_chest_mk2", true)
+  Names.Proto.StorageChestMk2Stored = GenNames("se_chest_mk2_stored", true)
 
   Names.Proto.ProviderChest = GenNames("se_provider_chest", true)
   Names.Proto.RequesterChest = GenNames("se_requester_chest", true)

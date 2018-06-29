@@ -341,6 +341,53 @@ data:extend(
       circuit_connector_sprites = circuit_connector_definitions["chest"].sprites,
       circuit_wire_max_distance = 9
     },
+    -- Storage Chest Mk2 with contents
+    {
+      type = "container",
+      name = SEConstants.Names.Proto.StorageChestMk2Stored.Entity,
+      icon = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk2.png",
+      icon_size = 32,
+      flags = {"placeable-neutral", "player-creation"},
+      minable = {mining_time = 3, result = SEConstants.Names.Proto.StorageChestMk2Stored.Item},
+      max_health = 500,
+      corpse = "small-remnants",
+      open_sound = {filename = "__base__/sound/metallic-chest-open.ogg", volume = 0.65},
+      close_sound = {filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7},
+      resistances = {
+        {
+          type = "fire",
+          percent = 90
+        },
+        {
+          type = "impact",
+          percent = 10
+        }
+      },
+      collision_box = {{-0.32, -0.32}, {0.32, 0.32}},
+      selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
+      fast_replaceable_group = "container",
+      inventory_size = 128,
+      vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65},
+      picture = {
+        filename = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk2.png",
+        priority = "extra-high",
+        width = 32,
+        height = 32,
+        shift = {0, 0}
+      },
+      circuit_wire_connection_point = {
+        shadow = {
+          red = {0.734375, 0.453125},
+          green = {0.609375, 0.515625}
+        },
+        wire = {
+          red = {0.44625, 0.21875},
+          green = {0.38625, 0.375}
+        }
+      },
+      circuit_connector_sprites = circuit_connector_definitions["chest"].sprites,
+      circuit_wire_max_distance = 9
+    },
     -- Interface Chest
     {
       type = "container",

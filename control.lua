@@ -58,6 +58,7 @@ SE.NodeHandlers.AddEntityHandler(protoNames.Controller.Entity, handlerNames.Cont
 SE.NodeHandlers.AddEntityHandler(protoNames.EnergyAcceptor.Entity, handlerNames.EnergyAcceptor)
 SE.NodeHandlers.AddEntityHandler(protoNames.StorageChestMk1.Entity, handlerNames.Storage)
 SE.NodeHandlers.AddEntityHandler(protoNames.StorageChestMk2.Entity, handlerNames.Storage)
+SE.NodeHandlers.AddEntityHandler(protoNames.StorageChestMk2Stored.Entity, handlerNames.Storage)
 SE.NodeHandlers.AddEntityHandler(protoNames.RequesterChest.Entity, handlerNames.Storage)
 SE.NodeHandlers.AddEntityHandler(protoNames.InterfaceChest.Entity, handlerNames.Interface)
 SE.NodeHandlers.AddEntityHandler(protoNames.ProviderChest.Entity, handlerNames.Interface)

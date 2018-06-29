@@ -70,15 +70,16 @@ return function()
     end
   end
 
+  -- RemoveNodeByIndex( int, [LuaInventory] )
   -- Removes a node by its index
-  local function RemoveNodeByIndex(idx)
+  local function RemoveNodeByIndex(idx, bufferInventory)
     --SE.Logger.Trace("Networks: Removing node")
     local node = Nodes[idx]
 
     local nodeHandler = SE.NodeHandlers.GetNodeHandler(node)
 
     -- Inform the node
-    nodeHandler.OnDestroy(node)
+    nodeHandler.OnDestroy(node, bufferInventory)
 
     -- Remove from networks
     local network = NetworksManager.GetNetworkForNode(node, defines.wire_type.green)
@@ -150,11 +151,13 @@ return function()
     end
   end
 
-  -- Finds the node for the given entity and removes it.
-  function NetworksManager.RemoveNodeByEntity(entity)
+  -- OnNodeEntityMined( LuaEntity, LuaInventory )
+  -- Called when an entity is being mined
+  function NetworksManager.OnNodeEntityMined(entity, bufferInventory)
     for idx = 1, #Nodes do
       if (Nodes[idx].Entity == entity) then
-        RemoveNodeByIndex(idx)
+        -- Remove the node
+        RemoveNodeByIndex(idx, bufferInventory)
         break
       end
     end

@@ -61,6 +61,19 @@ data:extend(
       place_result = SEConstants.Names.Proto.StorageChestMk2.Entity,
       stack_size = 50
     },
+    -- Chest Mk2 with contents
+    {
+      type = "item-with-inventory",
+      name = SEConstants.Names.Proto.StorageChestMk2Stored.Item,
+      icon = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk2.png",
+      icon_size = 32,
+      flags = {"goes-to-quickbar"},
+      subgroup = SEConstants.Strings.SEIGroup,
+      order = "b-a-d",
+      place_result = SEConstants.Names.Proto.StorageChestMk2Stored.Entity,
+      stack_size = 1,
+      inventory_size = 128
+    },
     -- Interface Chest
     {
       type = "item",
