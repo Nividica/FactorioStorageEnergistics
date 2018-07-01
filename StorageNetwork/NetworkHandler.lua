@@ -497,6 +497,7 @@ return function()
   -- GetStorageContents( Self ) :: Map( item name -> count)
   -- Returns all items in the network
   function SENetwork:GetStorageContents()
+    -- TODO: Pass in event, use event.tick
     local tick = game.tick
     -- New tick?
     if (tick ~= self.LastStorageTick) then

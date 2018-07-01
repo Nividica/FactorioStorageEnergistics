@@ -146,6 +146,7 @@ return function()
   -- Calls the given event-handler function on the gui-handler
   local function HandlerGeneralizedGuiEvent(event, eventHandlerFunctionName)
     -- Get the player
+    -- TODO: Remove this, use player_index instead
     local player = game.players[event.player_index]
 
     -- Get the gui
@@ -202,6 +203,7 @@ return function()
   -- shift :: boolean
   function SEGuiManager.OnElementClicked(event)
     -- Get the player
+    -- TODO: Player index
     local player = game.players[event.player_index]
 
     -- Get the gui
