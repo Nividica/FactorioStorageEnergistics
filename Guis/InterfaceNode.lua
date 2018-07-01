@@ -146,7 +146,7 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnShow
-  function InterfaceNodeGUI:OnShow(player)
+  function InterfaceNodeGUI:OnShow(playerIndex)
     local SLOT_COUNT = 12
 
     -- Create properties
@@ -157,7 +157,7 @@ return function(BaseGUI)
     self.AmountTextfield = nil
 
     -- Get root
-    local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
+    local root = game.players[playerIndex].gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
 
     -- Has frame?
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
@@ -263,7 +263,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnClose
-  function InterfaceNodeGUI:OnClose(player)
+  function InterfaceNodeGUI:OnClose(playerIndex)
+    local player = game.players[playerIndex]
     local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
     if (frame ~= nil) then

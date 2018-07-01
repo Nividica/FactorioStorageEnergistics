@@ -6,6 +6,9 @@
 return function()
   local NetworksManager = {}
 
+  local NetworkTickRate = 30
+  local LastNetworkTick = 0
+
   -- All Nodes
   -- Sequential array
   -- Serialized
@@ -171,22 +174,23 @@ return function()
     return nil
   end
 
+  -- Tick( Event )
   -- Ticks all nodes, and periodically ticks each network
-  function NetworksManager.Tick()
+  function NetworksManager.Tick(event)
     -- Tick networks
-    for _, network in pairs(Networks) do
+    for _, network in next, Networks do
       SE.NetworkHandler.Tick(network)
     end
 
     -- Tick nodes
-    for node, handler in pairs(TickingNodes) do
+    for node, handler in next, TickingNodes do
       if (handler.Valid(node)) then
         handler.OnTick(node)
       end
     end
 
     -- Network tick?
-    if (math.fmod(game.tick, SE.Settings.TickRate) == 0) then
+    if (math.fmod(event.tick, SE.Settings.TickRate) == 0) then
       -- Validate all nodes and connections
       local node = nil
       local idx = 1

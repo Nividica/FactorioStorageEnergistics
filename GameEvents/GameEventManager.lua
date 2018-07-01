@@ -38,9 +38,9 @@ return function()
   -- OnTick( Event ) :: void
   -- Called every game tick.
   function GameEventManager.OnTick(event)
-    SE.Networks.Tick()
+    SE.Networks.Tick(event)
     SE.GuiManager.Tick()
-    SE.Logger.Tick()
+    --SE.Logger.Tick()
   end
 
   -- OnPlayerJoined( Event ) :: void

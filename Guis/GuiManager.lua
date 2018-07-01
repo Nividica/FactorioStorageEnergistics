@@ -15,259 +15,181 @@ return function()
   SEGuiManager.Guis.StorageNode = (require "Guis/StorageNode")(SEGuiManager.Guis.BaseGui)
   SEGuiManager.Guis.NetworkOverview = (require "Guis/NetworkOverview")(SEGuiManager.Guis.BaseGui)
 
-  -- Map( PlayerIndex -> ( {SEGuiManager, Node, Handler} or False ) )
-  -- Tracks what nodes players have open, and each nodes data
-  -- False is stored when the player has something open, but it is not a node
-  local OpenedNodes = {}
-
-  -- Map( PlayerIndex -> Map( SEGuiManager -> guiObject ) )
-  -- Tracks what Guis players have open, and each Guis data
+  -- Map( PlayerIndex :: uint -> { GuiHandler :: SEGuiManager, GuiData :: Any } ) )
+  -- Tracks which GUI players have open, and each Guis data
   -- Note: GUI data is not saved between game save/loads
   local OpenedGuis = {}
 
-  -- OnOpenEntity( LuaPlayer ) :: NodeInfo | false
+  -- OnOpenEntity( uint, LuaEntity ) :: void
   -- Called when the player has just opened an entity
   -- Returns: The nodes info, or false
-  local function OnOpenEntity(player)
+  local function OnOpenEntity(playerIndex, entity)
     -- Does that entity have a node handler?
-    local handler = SE.NodeHandlers.GetEntityHandler(player.opened)
+    local handler = SE.NodeHandlers.GetEntityHandler(entity)
     if (handler == nil) then
       -- Not a network node
-      return false
+      return
     end
 
     -- Get the node for the entity
-    local node = SE.Networks.GetNodeForEntity(player.opened)
+    local node = SE.Networks.GetNodeForEntity(entity)
     if (node == nil) then
       error("Storage Energistics: Player Opened An Unregistered Entity")
     end
 
-    local nodeInfo = {Node = node, Handler = handler}
-
     -- Ask the handler for a GUI
-    local guiHandler = handler.OnPlayerOpenedNode(node, player)
+    local guiHandler = handler.OnGetGuiHandler(node, playerIndex)
     if (guiHandler ~= nil) then
       -- Show the gui
-      nodeInfo.SEGuiManager = guiHandler
-      SEGuiManager.ShowGui(player, guiHandler, nodeInfo)
-    end
-
-    return nodeInfo
-  end
-
-  -- OnNodeClosed( LuaPlayer, NodeInfo ) :: void
-  -- Called when the player no longer has a node-entity open
-  local function OnNodeClosed(player, nodeInfo)
-    -- Inform the node handler
-    nodeInfo.Handler.OnPlayerClosedNode(nodeInfo.Node, player)
-
-    -- Close the GUI
-    if (nodeInfo.SEGuiManager ~= nil) then
-      SEGuiManager.CloseGui(player, nodeInfo.SEGuiManager)
+      SEGuiManager.ShowGui(playerIndex, guiHandler, {Node = node})
     end
   end
 
-  -- CheckPlayerOpened( LuaPlayer, uint ) :: void
-  -- Check what the player has open and send events.
-  -- For each player there are several possibilities:
-  -- A) Nothing changed
-  -- B) Player opened new non-node entity
-  -- C) Player opened new node with no GUI
-  -- D) Player opened new node with GUI
-  -- E) Player closed non-node entity
-  -- F) Player closed node with no GUI
-  -- G) Player closed node with GUI
-  -- In case B, it will be marked the player has something open
-  -- In cases C and F, the node events will fire, but no gui events
-  -- In cases D and G, node and gui events will fire
-  -- In case E, it will be marked the player no longer has anything open
-  -- Note: It is assumed that a player can not have X opened one tick then Y opened the next
-  -- and that there must be at least one tick where player.opened is nil
-  local function CheckPlayerOpened(player, playerIndex)
-    -- Get the exising opened node
-    local nodeInfo = OpenedNodes[playerIndex]
-
-    if (nodeInfo ~= nil and player.opened == nil) then
-      -- Something was opened, and is now closed.
-      -- Mark as closed
-      OpenedNodes[playerIndex] = nil
-
-      -- Was the opened thing a node?
-      if (nodeInfo ~= false) then
-        -- Close the node
-        OnNodeClosed(player, nodeInfo)
-      end
-    elseif (nodeInfo == nil and player.opened ~= nil) then
-      -- Nothing was opened, but now something is
-      -- Does the player have an entity opened?
-      if (player.opened_gui_type == defines.gui_type.entity and type(player.opened) == "table" and player.opened.direction ~= nil) then
-        -- Check the entity
-        OpenedNodes[playerIndex] = OnOpenEntity(player)
-      else
-        -- Mark that the player has a non node/entity open
-        -- This is purely for performance reasons, so we don't re-run the entity and handler check every tick.
-        OpenedNodes[playerIndex] = false
-      end
-    end
-  end
-
-  -- TickGuis( LuaPlayer ) :: void
-  -- Ticks any opened guis that wish to be ticked.
-  local function TickGuis(player)
-    -- Get the map for this player
-    local guiMap = OpenedGuis[player.index]
-    if (guiMap ~= nil) then
-      -- Check each open gui
-      for guiHandler, guiObject in pairs(guiMap) do
-        if (guiHandler.NeedsTicks) then
-          -- Tick the gui
-          if (not guiHandler.OnTick(guiObject, player)) then
-            -- Close the gui
-            -- (As we are not adding to guiMap, this should be safe)
-            SEGuiManager.CloseGui(player, guiHandler)
-          end
-        end
-      end
-    end
-  end
-
-  -- ShowGui( LuaPlayer, GuiHandler, Table ) :: void
+  -- ShowGui( uint, GuiHandler, Table ) :: void
   -- Attempts to show the gui.
-  function SEGuiManager.ShowGui(player, guiHandler, guiObject)
-    -- Ensure there is a handler
-    if (guiHandler == nil) then
-      return
-    end
-
-    -- Ensure there is a map
-    local guiMap = OpenedGuis[player.index] or {}
-
-    -- Does the player already have this gui open?
-    if (guiMap[guiHandler] ~= nil) then
-      -- Close the GUI
-      SEGuiManager.CloseGui(player, guiHandler)
-    end
-
-    -- Ensure guiObject is not nil
-    guiObject = guiObject or {}
+  function SEGuiManager.ShowGui(playerIndex, guiHandler, guiData)
+    -- Ensure the gui data object
+    guiData = guiData or {}
 
     -- Open the GUI
-    if (guiHandler.OnShow(guiObject, player)) then
+    if (guiHandler.OnShow(guiData, playerIndex)) then
       -- Save the data
-      guiMap[guiHandler] = guiObject
-      OpenedGuis[player.index] = guiMap
+      OpenedGuis[playerIndex] = {GuiHandler = guiHandler, GuiData = guiData}
     end
   end
 
-  -- CloseGui( LuaPlayer, GuiHandler ) :: void
+  -- CloseGui( uint ) :: void
   -- Attempts to close the gui.
-  function SEGuiManager.CloseGui(player, guiHandler)
-    -- Ensure there is a handler
-    if (guiHandler == nil) then
-      return
-    end
-
-    -- Get the map
-    local guiMap = OpenedGuis[player.index]
-    if (guiMap == nil) then
-      return
-    end
-
+  function SEGuiManager.CloseGui(playerIndex)
     -- Get the data
-    local guiObject = guiMap[guiHandler]
-    if (guiObject == nil) then
-      return
-    end
+    local openedGui = OpenedGuis[playerIndex]
 
     -- Close the GUI
-    guiHandler.OnClose(guiObject, player)
+    openedGui.GuiHandler.OnClose(openedGui.GuiData, playerIndex)
 
     -- Clear the entry
-    guiMap[guiHandler] = nil
+    OpenedGuis[playerIndex] = nil
   end
 
-  function SEGuiManager.IsGuiOpen(player, guiHandler)
-    -- Ensure there is a handler
-    if (guiHandler == nil) then
-      return false
-    end
-
-    -- Get the map
-    local guiMap = OpenedGuis[player.index]
-    if (guiMap == nil) then
+  -- IsGuiOpen( uint, GuiHandler ) :: void
+  -- Returns true if the specified gui is open
+  function SEGuiManager.IsGuiOpen(playerIndex, guiHandler)
+    -- Get the gui
+    local openedGui = OpenedGuis[playerIndex]
+    if (openedGui == nil) then
       return false
     end
 
     -- Get the data
-    return guiMap[guiHandler] ~= nil
+    return openedGui.GuiHandler == guiHandler
   end
 
   -- Tick() :: void
   -- Called every game tick
   -- If there are any GUIs open, and those GUIs accept ticks, they will be ticked.
   function SEGuiManager.Tick()
-    -- Get the list of players
-    for playerIndex, player in pairs(game.players) do
-      -- Check what the player has open
-      CheckPlayerOpened(player, playerIndex)
-
-      -- Tick GUIs for this player
-      TickGuis(player)
+    -- Tick guis
+    for player_index, openedGui in pairs(OpenedGuis) do
+      if (openedGui.GuiHandler.NeedsTicks) then
+        -- Tick the gui
+        if (not openedGui.GuiHandler.OnTick(openedGui.GuiData, player_index)) then
+          -- Close the gui
+          -- (As we are not adding, so this should be safe)
+          SEGuiManager.CloseGui(player_index)
+        end
+      end
     end
+  end
+
+  -- OnPlayerOpenedGUI( Event )
+  -- Called when the player opens a GUI.
+  -- Event fields:
+  -- - player_index :: uint: The player.
+  -- - gui_type :: defines.gui_type: The GUI type that was opened.
+  -- - entity :: LuaEntity (optional): The entity that was opened
+  -- - item :: LuaItemStack (optional): The item that was opened
+  -- - equipment :: LuaEquipment (optional): The equipment that was opened
+  -- - other_player :: LuaPlayer (optional): The other player that was opened
+  -- - element :: LuaGuiElement (optional): The custom GUI element that was opened
+  -- Called when the player opens a GUI.
+  function SEGuiManager.OnPlayerOpenedGUI(event)
+    -- Opened entity?
+    if (event.entity ~= nil) then
+      OnOpenEntity(event.player_index, event.entity)
+    end
+  end
+
+  -- OnPlayerClosedGUI( Event )
+  -- Called when the player closes the GUI they have open.
+  -- Event fields:
+  -- - player_index :: uint: The player.
+  -- - gui_type :: defines.gui_type: The GUI type that was open.
+  -- - entity :: LuaEntity (optional): The entity that was open
+  -- - item :: LuaItemStack (optional): The item that was open
+  -- - equipment :: LuaEquipment (optional): The equipment that was open
+  -- - other_player :: LuaPlayer (optional): The other player that was open
+  -- - element :: LuaGuiElement (optional): The custom GUI element that was open
+  -- Note: This is only called if the player explicitly closed the GUI.
+  -- Note: It's not advised to open any other GUI during this event because if this is run as a request to open a different GUI the game will force close the new opened GUI without notice to ensure the original requested GUI is opened.
+  function SEGuiManager.OnPlayerClosedGUI(event)
+    -- Does this player not have an SE gui open?
+    local openedGui = OpenedGuis[event.player_index]
+    if (openedGui == nil) then
+      return
+    end
+
+    -- Close it
+    SEGuiManager.CloseGui(event.player_index)
+  end
+
+  -- HandlerGeneralizedGuiEvent( Event, String ) :: void
+  -- Calls the given event-handler function on the gui-handler
+  local function HandlerGeneralizedGuiEvent(event, eventHandlerFunctionName)
+    -- Get the player
+    local player = game.players[event.player_index]
+
+    -- Get the gui
+    local openedGui = OpenedGuis[player.index]
+    if (openedGui == nil) then
+      return
+    end
+
+    -- Inform the GUI
+    openedGui.GuiHandler[eventHandlerFunctionName](openedGui.GuiData, player, event.element)
   end
 
   -- OnElementChanged( Event ) :: void
   -- Called when a selection element has changed
   function SEGuiManager.OnElementChanged(event)
-    -- Get the player
-    local player = game.players[event.player_index]
-
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
-      return
-    end
-
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerChangedSelectionElement(guiObject, player, event.element)
-    end
+    HandlerGeneralizedGuiEvent(event, "OnPlayerChangedSelectionElement")
   end
 
   -- OnCheckboxChanged( Event ) :: void
   -- Called when a checkbox changes
   function SEGuiManager.OnCheckboxChanged(event)
-    -- Get the player
-    local player = game.players[event.player_index]
-
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
-      return
-    end
-
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerChangedCheckboxElement(guiObject, player, event.element)
-    end
+    HandlerGeneralizedGuiEvent(event, "OnPlayerChangedCheckboxElement")
   end
 
   -- OnDropDownChanged( Event ) :: void
   -- Called when a dropdown changes
   function SEGuiManager.OnDropDownChanged(event)
-    -- Get the player
-    local player = game.players[event.player_index]
+    HandlerGeneralizedGuiEvent(event, "OnPlayerChangedDropDown")
+  end
 
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
-      return
-    end
+  -- OnTextChanged( Event ) :: void
+  -- Event fields:
+  -- element :: LuaGuiElement
+  -- player_index :: uint
+  function SEGuiManager.OnTextChanged(event)
+    HandlerGeneralizedGuiEvent(event, "OnPlayerChangedText")
+  end
 
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerChangedDropDown(guiObject, player, event.element)
-    end
+  -- OnSliderChanged( Event ) :: void
+  -- Event fields:
+  -- element :: LuaGuiElement
+  -- player_index :: uint
+  function SEGuiManager.OnSliderChanged(event)
+    HandlerGeneralizedGuiEvent(event, "OnPlayerChangedSlider")
   end
 
   -- OnElementClicked( Event ) :: void
@@ -282,61 +204,21 @@ return function()
     -- Get the player
     local player = game.players[event.player_index]
 
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
+    -- Get the gui
+    local openedGui = OpenedGuis[player.index]
+    if (openedGui == nil) then
       return
     end
 
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerClicked(guiObject, player, event)
-    end
-  end
-
-  -- OnTextChanged( Event ) :: void
-  -- Event fields:
-  -- element :: LuaGuiElement
-  -- player_index :: uint
-  function SEGuiManager.OnTextChanged(event)
-    -- Get the player
-    local player = game.players[event.player_index]
-
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
-      return
-    end
-
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerChangedText(guiObject, player, event.element)
-    end
-  end
-
-  -- OnSliderChanged( Event ) :: void
-  -- Event fields:
-  -- element :: LuaGuiElement
-  -- player_index :: uint
-  function SEGuiManager.OnSliderChanged(event)
-    -- Get the player
-    local player = game.players[event.player_index]
-
-    -- Get the handler map
-    local handlerMap = OpenedGuis[player.index]
-    if (handlerMap == nil) then
-      return
-    end
-
-    for guiHandler, guiObject in pairs(handlerMap) do
-      -- Inform the GUI
-      guiHandler.OnPlayerChangedSlider(guiObject, player, event.element)
-    end
+    -- Inform the GUI
+    openedGui.GuiHandler.OnPlayerClicked(openedGui.GuiData, player, event)
   end
 
   -- RegisterWithGame() :: void
   -- Called to register the handler events
   function SEGuiManager.RegisterWithGame()
+    script.on_event(defines.events.on_gui_closed, SEGuiManager.OnPlayerClosedGUI)
+    script.on_event(defines.events.on_gui_opened, SEGuiManager.OnPlayerOpenedGUI)
     script.on_event(defines.events.on_gui_elem_changed, SEGuiManager.OnElementChanged)
     script.on_event(defines.events.on_gui_checked_state_changed, SEGuiManager.OnCheckboxChanged)
     script.on_event(defines.events.on_gui_selection_state_changed, SEGuiManager.OnDropDownChanged)
@@ -351,7 +233,7 @@ return function()
   -- as their data is not saved
   function SEGuiManager.OnPlayerJoinedGame(player)
     for _, guiHandler in pairs(SEGuiManager.Guis) do
-      guiHandler.OnClose(nil, player)
+      guiHandler.OnClose(nil, player.index)
     end
   end
 

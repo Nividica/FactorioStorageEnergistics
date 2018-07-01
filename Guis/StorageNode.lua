@@ -9,9 +9,9 @@ return function(BaseGUI)
   setmetatable(StorageNodeGUI, {__index = BaseGUI})
 
   -- @See BaseGUI:OnShow
-  function StorageNodeGUI:OnShow(player)
+  function StorageNodeGUI:OnShow(playerIndex)
     -- Get root
-    local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
+    local root = game.players[playerIndex].gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
 
     -- Has frame?
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
@@ -46,7 +46,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnClose
-  function StorageNodeGUI:OnClose(player)
+  function StorageNodeGUI:OnClose(playerIndex)
+    local player = game.players[playerIndex]
     local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
     if (frame ~= nil) then

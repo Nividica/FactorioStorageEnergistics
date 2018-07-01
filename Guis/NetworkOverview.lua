@@ -355,12 +355,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnShow
-  function NetworkOverviewGUI:OnShow(player)
-    -- Does the player have something else opened?
-    if (player.opened ~= nil) then
-      -- Player has something else open, don't show overview
-      return false
-    end
+  function NetworkOverviewGUI:OnShow(playerIndex)
+    local player = game.players[playerIndex]
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
@@ -368,7 +364,7 @@ return function(BaseGUI)
     -- Has frame?
     if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
       -- Already open, close first
-      NetworkOverviewGUI.OnClose(self, player)
+      NetworkOverviewGUI.OnClose(self, player.index)
     end
 
     -- Build the frame
@@ -387,7 +383,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnClose
-  function NetworkOverviewGUI:OnClose(player)
+  function NetworkOverviewGUI:OnClose(playerIndex)
+    local player = game.players[playerIndex]
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
     local frame = root[SE.Constants.Names.Gui.NetworkFrame]
 
@@ -411,22 +408,14 @@ return function(BaseGUI)
     local element = event.element
 
     if (element ~= nil and element.name == "se_network_overview_close") then
-      SE.GuiManager.CloseGui(player, NetworkOverviewGUI)
+      SE.GuiManager.CloseGui(player.index)
     end
   end
 
   -- @See BaseGui:OnTick
-  function NetworkOverviewGUI:OnTick(player)
+  function NetworkOverviewGUI:OnTick(playerIndex)
     if (self == nil or self.TickCount == nil) then
-      -- Invalid data, close the gui
-      NetworkOverviewGUI.OnClose(nil, player)
-      return false
-    end
-
-    -- Player does not have frame open?
-    if (player.opened ~= player.gui[SE.Constants.Names.Gui.NetworkFrameRoot][SE.Constants.Names.Gui.NetworkFrame]) then
-      -- Player no longer has frame open, close and cleanup
-      NetworkOverviewGUI.OnClose(self, player)
+      -- Invalid data
       return false
     end
 
@@ -439,7 +428,9 @@ return function(BaseGUI)
     end
     self.TickCount = 0
 
-    LoadNetworkContents(self)
+    if (#self.NetworkIDs > 0) then
+      LoadNetworkContents(self)
+    end
 
     return true
   end

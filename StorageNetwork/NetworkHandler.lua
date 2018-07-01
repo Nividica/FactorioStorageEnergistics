@@ -497,10 +497,11 @@ return function()
   -- GetStorageContents( Self ) :: Map( item name -> count)
   -- Returns all items in the network
   function SENetwork:GetStorageContents()
+    local tick = game.tick
     -- New tick?
-    if (game.tick ~= self.LastStorageTick) then
+    if (tick ~= self.LastStorageTick) then
       -- Mark tick
-      self.LastStorageTick = game.tick
+      self.LastStorageTick = tick
       self.StorageCatalog = {}
       for node, handler in pairs(self.StorageNodes) do
         handler.GetContents(node, self.StorageCatalog)
