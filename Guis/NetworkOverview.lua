@@ -198,7 +198,7 @@ return function(BaseGUI)
           table.remove(guiData.NetworkIDs, idx)
         else
           -- Add to the dropdown list
-          ddList[#ddList + 1] = ConcatStringWithLocalized(LocalStrings.NetworkID, "# " .. tostring(networkID))
+          table.insert(ddList, 1, ConcatStringWithLocalized(LocalStrings.NetworkID, "# " .. tostring(networkID)))
         end
 
         -- Decrement index
