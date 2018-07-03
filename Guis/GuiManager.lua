@@ -203,6 +203,16 @@ return function()
     HandlerGeneralizedGuiEvent(event, "OnPlayerClicked")
   end
 
+  -- OnPlayerJoinedGame( Event ) :: void
+  -- Called when a player joins the game
+  -- Walk through all GUI's and ensure they are closed
+  -- as their data is not saved
+  function SEGuiManager.OnPlayerJoinedGame(event)
+    for _, guiHandler in pairs(SEGuiManager.Guis) do
+      guiHandler.OnClose(nil, event.player_index)
+    end
+  end
+
   -- RegisterWithGame() :: void
   -- Called to register the handler events
   function SEGuiManager.RegisterWithGame()
@@ -214,16 +224,6 @@ return function()
     script.on_event(defines.events.on_gui_click, SEGuiManager.OnElementClicked)
     script.on_event(defines.events.on_gui_text_changed, SEGuiManager.OnTextChanged)
     script.on_event(defines.events.on_gui_value_changed, SEGuiManager.OnSliderChanged)
-  end
-
-  -- OnPlayerJoinedGame( LuaPlayer ) :: void
-  -- Called when a player joins the game
-  -- Walk through all GUI's and ensure they are closed
-  -- as their data is not saved
-  function SEGuiManager.OnPlayerJoinedGame(player)
-    for _, guiHandler in pairs(SEGuiManager.Guis) do
-      guiHandler.OnClose(nil, player.index)
-    end
   end
 
   return SEGuiManager
