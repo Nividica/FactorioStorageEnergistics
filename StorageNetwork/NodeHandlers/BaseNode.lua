@@ -93,7 +93,7 @@ return function()
 
   -- void OnTick(self)
   -- Called when the game ticks, if NeedsTicks is true.
-  function BaseNodeHandler:OnTick()
+  function BaseNodeHandler:OnTick(tick)
   end
 
   -- OnNetworkTick( Self, Network ) :: void

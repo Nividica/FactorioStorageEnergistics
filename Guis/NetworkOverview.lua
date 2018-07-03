@@ -147,14 +147,14 @@ return function(BaseGUI)
     end
   end
 
-  -- LoadNetworkContents( Table ) :: void
+  -- LoadNetworkContents( Table, uint ) :: void
   -- Adds the contents of the network to the frame
-  local function LoadNetworkContents(guiData)
+  local function LoadNetworkContents(guiData, tick)
     -- Get the network
     local network = SE.Networks.GetNetwork(guiData.NetworkIDs[guiData.FrameData.NetworkDropDown.selected_index])
 
     -- Query the network for the items
-    local networkContents = SE.NetworkHandler.GetStorageContents(network)
+    local networkContents = SE.NetworkHandler.GetStorageContents(network, tick)
 
     -- Extract capacity amounts
     local totalSlots = networkContents[SE.Constants.Strings.TotalSlots]
@@ -175,9 +175,9 @@ return function(BaseGUI)
     DisplayItems(guiData, networkContents)
   end
 
-  -- UpdateDropdownNetworks( Table )
+  -- UpdateDropdownNetworks( Table, uint ) :: void
   -- Sets the networks in the dropdown
-  local function UpdateDropdownNetworks(guiData)
+  local function UpdateDropdownNetworks(guiData, tick)
     -- Get network ids
     guiData.NetworkIDs = SE.Networks.GetNetworkIDs()
 
@@ -209,7 +209,7 @@ return function(BaseGUI)
       guiData.FrameData.NetworkDropDown.selected_index = 1
 
       -- Load the first network
-      LoadNetworkContents(guiData)
+      LoadNetworkContents(guiData, tick)
     end
   end
 
@@ -355,8 +355,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnShow
-  function NetworkOverviewGUI:OnShow(playerIndex)
-    local player = game.players[playerIndex]
+  function NetworkOverviewGUI:OnShow(event)
+    local player = game.players[event.player_index]
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
@@ -371,7 +371,7 @@ return function(BaseGUI)
     self.FrameData = NewFrame(root)
 
     -- Build dropdown list
-    UpdateDropdownNetworks(self)
+    UpdateDropdownNetworks(self, event.tick)
 
     -- Add tick info
     self.TickCount = 0
@@ -399,21 +399,21 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnPlayerChangedDropDown
-  function NetworkOverviewGUI:OnPlayerChangedDropDown(player, element)
-    LoadNetworkContents(self, self.NetworkIDs[element.selected_index])
+  function NetworkOverviewGUI:OnPlayerChangedDropDown(event)
+    LoadNetworkContents(self, event.tick)
   end
 
   -- @See BaseGUI:OnPlayerClicked
-  function NetworkOverviewGUI:OnPlayerClicked(player, event)
+  function NetworkOverviewGUI:OnPlayerClicked(event)
     local element = event.element
 
     if (element ~= nil and element.name == "se_network_overview_close") then
-      SE.GuiManager.CloseGui(player.index)
+      SE.GuiManager.CloseGui(event.player_index)
     end
   end
 
   -- @See BaseGui:OnTick
-  function NetworkOverviewGUI:OnTick(playerIndex)
+  function NetworkOverviewGUI:OnTick(player_index, event)
     if (self == nil or self.TickCount == nil) then
       -- Invalid data
       return false
@@ -429,7 +429,7 @@ return function(BaseGUI)
     self.TickCount = 0
 
     if (#self.NetworkIDs > 0) then
-      LoadNetworkContents(self)
+      LoadNetworkContents(self, event.tick)
     end
 
     return true

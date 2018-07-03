@@ -119,7 +119,7 @@ return function()
 
   -- Tick( Self ) :: void
   -- Called when the game ticks
-  function SENetwork:Tick()
+  function SENetwork:OnTick(tick)
     -- Draw idle power
     self.HasPower = (self.IdlePowerDraw == 0) or SENetwork.ExtractPower(self, self.IdlePowerDraw)
   end
@@ -494,11 +494,9 @@ return function()
     return transfer.Amount
   end
 
-  -- GetStorageContents( Self ) :: Map( item name -> count)
+  -- GetStorageContents( Self, uint ) :: Map( item name -> count)
   -- Returns all items in the network
-  function SENetwork:GetStorageContents()
-    -- TODO: Pass in event, use event.tick
-    local tick = game.tick
+  function SENetwork:GetStorageContents(tick)
     -- New tick?
     if (tick ~= self.LastStorageTick) then
       -- Mark tick

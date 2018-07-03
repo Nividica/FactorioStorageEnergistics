@@ -39,7 +39,7 @@ return function()
   -- Called every game tick.
   function GameEventManager.OnTick(event)
     SE.Networks.Tick(event)
-    SE.GuiManager.Tick()
+    SE.GuiManager.Tick(event.tick)
     --SE.Logger.Tick()
   end
 

@@ -179,13 +179,13 @@ return function()
   function NetworksManager.Tick(event)
     -- Tick networks
     for _, network in next, Networks do
-      SE.NetworkHandler.Tick(network)
+      SE.NetworkHandler.OnTick(network, event.tick)
     end
 
     -- Tick nodes
     for node, handler in next, TickingNodes do
       if (handler.Valid(node)) then
-        handler.OnTick(node)
+        handler.OnTick(node, event.tick)
       end
     end
 

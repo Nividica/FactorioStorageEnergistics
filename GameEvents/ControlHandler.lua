@@ -16,7 +16,7 @@ return function()
     if (SE.GuiManager.IsGuiOpen(playerIndex, SE.GuiManager.Guis.NetworkOverview)) then
       SE.GuiManager.CloseGui(playerIndex, SE.GuiManager.Guis.NetworkOverview)
     else
-      SE.GuiManager.ShowGui(playerIndex, SE.GuiManager.Guis.NetworkOverview)
+      SE.GuiManager.ShowGui(event)
     end
   end
 

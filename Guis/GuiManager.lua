@@ -20,10 +20,12 @@ return function()
   -- Note: GUI data is not saved between game save/loads
   local OpenedGuis = {}
 
-  -- OnOpenEntity( uint, LuaEntity ) :: void
+  -- OnOpenEntity( Event ) :: void
   -- Called when the player has just opened an entity
   -- Returns: The nodes info, or false
-  local function OnOpenEntity(playerIndex, entity)
+  local function OnOpenEntity(event)
+    local entity = event.entity
+
     -- Does that entity have a node handler?
     local handler = SE.NodeHandlers.GetEntityHandler(entity)
     if (handler == nil) then
@@ -38,23 +40,23 @@ return function()
     end
 
     -- Ask the handler for a GUI
-    local guiHandler = handler.OnGetGuiHandler(node, playerIndex)
+    local guiHandler = handler.OnGetGuiHandler(node, event.player_index)
     if (guiHandler ~= nil) then
       -- Show the gui
-      SEGuiManager.ShowGui(playerIndex, guiHandler, {Node = node})
+      SEGuiManager.ShowGui(event, guiHandler, {Node = node})
     end
   end
 
   -- ShowGui( uint, GuiHandler, Table ) :: void
   -- Attempts to show the gui.
-  function SEGuiManager.ShowGui(playerIndex, guiHandler, guiData)
+  function SEGuiManager.ShowGui(event, guiHandler, guiData)
     -- Ensure the gui data object
     guiData = guiData or {}
 
     -- Open the GUI
-    if (guiHandler.OnShow(guiData, playerIndex)) then
+    if (guiHandler.OnShow(guiData, event)) then
       -- Save the data
-      OpenedGuis[playerIndex] = {GuiHandler = guiHandler, GuiData = guiData}
+      OpenedGuis[event.player_index] = {GuiHandler = guiHandler, GuiData = guiData}
     end
   end
 
@@ -87,12 +89,12 @@ return function()
   -- Tick() :: void
   -- Called every game tick
   -- If there are any GUIs open, and those GUIs accept ticks, they will be ticked.
-  function SEGuiManager.Tick()
+  function SEGuiManager.Tick(tick)
     -- Tick guis
     for player_index, openedGui in pairs(OpenedGuis) do
       if (openedGui.GuiHandler.NeedsTicks) then
         -- Tick the gui
-        if (not openedGui.GuiHandler.OnTick(openedGui.GuiData, player_index)) then
+        if (not openedGui.GuiHandler.OnTick(openedGui.GuiData, player_index, tick)) then
           -- Close the gui
           -- (As we are not adding, so this should be safe)
           SEGuiManager.CloseGui(player_index)
@@ -115,7 +117,7 @@ return function()
   function SEGuiManager.OnPlayerOpenedGUI(event)
     -- Opened entity?
     if (event.entity ~= nil) then
-      OnOpenEntity(event.player_index, event.entity)
+      OnOpenEntity(event)
     end
   end
 
@@ -145,18 +147,14 @@ return function()
   -- HandlerGeneralizedGuiEvent( Event, String ) :: void
   -- Calls the given event-handler function on the gui-handler
   local function HandlerGeneralizedGuiEvent(event, eventHandlerFunctionName)
-    -- Get the player
-    -- TODO: Remove this, use player_index instead
-    local player = game.players[event.player_index]
-
     -- Get the gui
-    local openedGui = OpenedGuis[player.index]
+    local openedGui = OpenedGuis[event.player_index]
     if (openedGui == nil) then
       return
     end
 
     -- Inform the GUI
-    openedGui.GuiHandler[eventHandlerFunctionName](openedGui.GuiData, player, event.element)
+    openedGui.GuiHandler[eventHandlerFunctionName](openedGui.GuiData, event)
   end
 
   -- OnElementChanged( Event ) :: void
@@ -202,18 +200,7 @@ return function()
   -- control :: boolean
   -- shift :: boolean
   function SEGuiManager.OnElementClicked(event)
-    -- Get the player
-    -- TODO: Player index
-    local player = game.players[event.player_index]
-
-    -- Get the gui
-    local openedGui = OpenedGuis[player.index]
-    if (openedGui == nil) then
-      return
-    end
-
-    -- Inform the GUI
-    openedGui.GuiHandler.OnPlayerClicked(openedGui.GuiData, player, event)
+    HandlerGeneralizedGuiEvent(event, "OnPlayerClicked")
   end
 
   -- RegisterWithGame() :: void

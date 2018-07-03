@@ -146,7 +146,7 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnShow
-  function InterfaceNodeGUI:OnShow(playerIndex)
+  function InterfaceNodeGUI:OnShow(event)
     local SLOT_COUNT = 12
 
     -- Create properties
@@ -157,7 +157,7 @@ return function(BaseGUI)
     self.AmountTextfield = nil
 
     -- Get root
-    local root = game.players[playerIndex].gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
+    local root = game.players[event.player_index].gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
 
     -- Has frame?
     local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
@@ -273,13 +273,15 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerChangedSelectionElement
-  function InterfaceNodeGUI:OnPlayerChangedSelectionElement(player, element)
-    -- Get the index of the changed element
-    local index = tonumber(string.sub(element.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
+  function InterfaceNodeGUI:OnPlayerChangedSelectionElement(event)
+    local dropdown = event.element
 
-    if (element.elem_value ~= nil) then
+    -- Get the index of the changed element
+    local index = tonumber(string.sub(dropdown.name, 1 + string.len(SE.Constants.Names.Gui.InterfaceItemSelectionElement)))
+
+    if (dropdown.elem_value ~= nil) then
       -- Set filter
-      SetFilter(self, index, {Item = element.elem_value, Amount = 1})
+      SetFilter(self, index, {Item = dropdown.elem_value, Amount = 1})
 
       -- Select button
       SetSelectedIndex(self, index)
@@ -290,7 +292,7 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerClicked
-  function InterfaceNodeGUI:OnPlayerClicked(player, event)
+  function InterfaceNodeGUI:OnPlayerClicked(event)
     local element = event.element
 
     -- Is the clicked element a select element button?
@@ -319,17 +321,19 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerChangedText
-  function InterfaceNodeGUI:OnPlayerChangedText(player, element)
+  function InterfaceNodeGUI:OnPlayerChangedText(event)
+    local txtBox = event.element
+
     -- Is there no selection?
     if (self.SelectedIndex == 0) then
       -- Reset
-      element.text = "1"
+      txtBox.text = "1"
       self.PreviousAmountText = "1"
       return
     end
 
     -- Get the text
-    local currentText = element.text
+    local currentText = txtBox.text
 
     local amount = 0
 
@@ -341,7 +345,7 @@ return function(BaseGUI)
       -- Is the amount valid?
       if (amount == nil) then
         -- Not numeric, restore last text
-        element.text = self.PreviousAmountText
+        txtBox.text = self.PreviousAmountText
         return
       end
 
@@ -358,16 +362,18 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerChangedSlider
-  function InterfaceNodeGUI:OnPlayerChangedSlider(player, element)
+  function InterfaceNodeGUI:OnPlayerChangedSlider(event)
+    local slider = event.element
+
     -- Is there no selection?
     if (self.SelectedIndex == 0) then
       -- Reset
-      element.slider_value = 1
+      slider.slider_value = 1
       return
     end
 
     -- Get the amount
-    local amount = SliderSteps[math.floor(element.slider_value)]
+    local amount = SliderSteps[math.floor(slider.slider_value)]
 
     -- Set the field
     SetAmountText(self, amount)
