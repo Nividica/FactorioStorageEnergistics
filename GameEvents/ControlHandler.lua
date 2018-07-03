@@ -14,9 +14,9 @@ return function()
 
     -- Toggle show/close
     if (SE.GuiManager.IsGuiOpen(playerIndex, SE.GuiManager.Guis.NetworkOverview)) then
-      SE.GuiManager.CloseGui(playerIndex, SE.GuiManager.Guis.NetworkOverview)
+      SE.GuiManager.CloseGui(playerIndex)
     else
-      SE.GuiManager.ShowGui(event)
+      SE.GuiManager.ShowGui(event, SE.GuiManager.Guis.NetworkOverview)
     end
   end
 

@@ -413,7 +413,7 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnTick
-  function NetworkOverviewGUI:OnTick(player_index, event)
+  function NetworkOverviewGUI:OnTick(player_index, tick)
     if (self == nil or self.TickCount == nil) then
       -- Invalid data
       return false
@@ -429,7 +429,7 @@ return function(BaseGUI)
     self.TickCount = 0
 
     if (#self.NetworkIDs > 0) then
-      LoadNetworkContents(self, event.tick)
+      LoadNetworkContents(self, tick)
     end
 
     return true
