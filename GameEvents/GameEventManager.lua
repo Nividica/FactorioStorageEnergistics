@@ -20,6 +20,7 @@ return function()
     SE.GuiManager.RegisterWithGame()
     script.on_event(defines.events.on_tick, GameEventManager.OnFirstTick)
     script.on_event(defines.events.on_player_joined_game, SE.GuiManager.OnPlayerJoinedGame)
+    script.on_event(defines.events.on_runtime_mod_setting_changed, SE.Settings.LoadSettings)
   end
 
   -- OnFirstTick( Event ) :: void

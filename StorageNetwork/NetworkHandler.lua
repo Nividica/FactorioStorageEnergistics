@@ -8,6 +8,10 @@ return function()
 
   require "Utils/Library"
 
+  -- local statTransferCount = 0
+  -- local statPowerUsed = 0
+  -- local statLastTick = 0
+
   -- NewNetwork( Int, Int ) :: Network
   -- Creates a new SENetwork with the given ID and wire type.
   function SENetwork.NewNetwork(networkID, wireType)
@@ -17,11 +21,11 @@ return function()
       ControllerNodes = {},
       PowerSourceNodes = {},
       PowerSourceNodeCount = 0,
+      PowerDrainNodeCount = 0,
       StorageNodes = {},
       DeviceNodes = {},
       TickingNodes = {},
       StorageCatalog = nil,
-      IdlePowerDraw = 0,
       HasPower = false,
       LastStorageTick = 0
     }
@@ -42,13 +46,16 @@ return function()
     -- Add to the proper node table
     if (nodeType == SE.Constants.NodeTypes.Storage and self.StorageNodes[node] == nil) then
       self.StorageNodes[node] = nodeHandler
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount + 1
     elseif (nodeType == SE.Constants.NodeTypes.Device and self.DeviceNodes[node] == nil) then
       self.DeviceNodes[node] = nodeHandler
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount + 1
     elseif (nodeType == SE.Constants.NodeTypes.PowerSource and self.PowerSourceNodes[node] == nil) then
       self.PowerSourceNodes[node] = nodeHandler
       self.PowerSourceNodeCount = self.PowerSourceNodeCount + 1
     elseif (nodeType == SE.Constants.NodeTypes.Controller and self.ControllerNodes[node] == nil) then
       self.ControllerNodes[node] = nodeHandler
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount + 1
     else
       return
     end
@@ -61,11 +68,6 @@ return function()
 
     -- Set the nodes network ID
     node.Networks[self.WireType] = self.NetworkID
-
-    -- Adjust idle power draw
-    if (nodeType ~= SE.Constants.NodeTypes.PowerSource) then
-      self.IdlePowerDraw = math.max(0, self.IdlePowerDraw + SE.Settings.NodeIdlePowerDrain)
-    end
 
     -- Fire event?
     if (fireNodeEvents) then
@@ -86,13 +88,16 @@ return function()
     -- Get the node type
     if (self.StorageNodes[node] ~= nil) then
       self.StorageNodes[node] = nil
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount - 1
     elseif (self.DeviceNodes[node] ~= nil) then
       self.DeviceNodes[node] = nil
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount - 1
     elseif (self.PowerSourceNodes[node] ~= nil) then
       self.PowerSourceNodes[node] = nil
       self.PowerSourceNodeCount = self.PowerSourceNodeCount - 1
     elseif (self.ControllerNodes[node] ~= nil) then
       self.ControllerNodes[node] = nil
+      self.PowerDrainNodeCount = self.PowerDrainNodeCount - 1
     else
       -- Node not found
       return
@@ -106,11 +111,6 @@ return function()
     -- Remove from node
     node.Networks[self.WireType] = nil
 
-    -- Adjust idle power draw
-    if (nodeType ~= SE.Constants.NodeTypes.PowerSource) then
-      self.IdlePowerDraw = math.max(0, self.IdlePowerDraw - SE.Settings.NodeIdlePowerDrain)
-    end
-
     if (fireNodeEvents) then
       -- Inform the node it is leaving
       return nodeHandler.OnLeaveNetwork(node, self)
@@ -121,7 +121,18 @@ return function()
   -- Called when the game ticks
   function SENetwork:OnTick(tick)
     -- Draw idle power
-    self.HasPower = (self.IdlePowerDraw == 0) or SENetwork.ExtractPower(self, self.IdlePowerDraw)
+    self.HasPower = (self.PowerDrainNodeCount == 0) or SENetwork.ExtractPower(self, self.PowerDrainNodeCount * SE.Settings.NodeIdlePowerDrain)
+
+    -- if (tick - statLastTick >= 60) then
+    --   if (statTransferCount > 0) then
+    --     for pIdx, player in pairs(game.players) do
+    --       player.print(" Transfering " .. tostring(statTransferCount) .. " items for a cost of " .. tostring(statPowerUsed))
+    --     end
+    --   end
+    --   statLastTick = tick
+    --   statTransferCount = 0
+    --   statPowerUsed = 0
+    -- end
   end
 
   -- NetworkTick( Self ) :: void
@@ -407,6 +418,9 @@ return function()
 
           -- Attempt to extract the power
           if (SENetwork.ExtractPower(network, itemPower + chunkPower)) then
+            -- statPowerUsed = statPowerUsed + itemPower + chunkPower
+            -- statTransferCount = statTransferCount + stackTransfering.count
+
             -- Power request successful
             -- Transfer
             handler[transferFn](node, stackTransfering, false)
