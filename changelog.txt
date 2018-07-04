@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.9.2
+Date: 04. 07. 2018
+  Bugfixes:
+    - Network selection dropdown in overview window was sorted backwards internally
+    - Settings were not updating when changed mid-game, and were locked to the values set when map was created.
+  Changes:
+    - Gui code overhaul. Greatly improved idle(no gui shown) peformance, improved active performance
+    - Reworked event processing to increase performance
+---------------------------------------------------------------------------------------------------
 Version: 0.9.1
 Date: 27. 06. 2018
   Bugfixes:
