@@ -272,7 +272,7 @@ data:extend(
       collision_box = {{-0.32, -0.32}, {0.32, 0.32}},
       selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
       fast_replaceable_group = "container",
-      inventory_size = 16,
+      inventory_size = 48,
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65},
       picture = {
         filename = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk1.png",
@@ -319,7 +319,7 @@ data:extend(
       collision_box = {{-0.32, -0.32}, {0.32, 0.32}},
       selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
       fast_replaceable_group = "container",
-      inventory_size = 128,
+      inventory_size = 192,
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65},
       picture = {
         filename = SEConstants.DataPaths.EntityGFX .. "SE_ChestMk2.png",
@@ -366,7 +366,7 @@ data:extend(
       collision_box = {{-0.32, -0.32}, {0.32, 0.32}},
       selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
       fast_replaceable_group = "container",
-      inventory_size = 16,
+      inventory_size = 48,
       vehicle_impact_sound = {filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65},
       picture = {
         filename = SEConstants.DataPaths.EntityGFX .. "SE_InterfaceChest.png",
@@ -411,7 +411,7 @@ data:extend(
         }
       },
       fast_replaceable_group = "container",
-      inventory_size = 16,
+      inventory_size = 48,
       logistic_mode = "passive-provider",
       open_sound = {filename = "__base__/sound/metallic-chest-open.ogg", volume = 0.65},
       close_sound = {filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7},
@@ -459,7 +459,7 @@ data:extend(
         }
       },
       fast_replaceable_group = "container",
-      inventory_size = 16,
+      inventory_size = 48,
       logistic_slots_count = 12,
       logistic_mode = "requester",
       open_sound = {filename = "__base__/sound/metallic-chest-open.ogg", volume = 0.65},
