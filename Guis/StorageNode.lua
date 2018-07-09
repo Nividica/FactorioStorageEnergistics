@@ -4,32 +4,24 @@
 -- Description:
 
 -- Constructs and returns the StorageNodeGUI object
-return function(BaseGUI)
+return function(BaseGui)
   local StorageNodeGUI = {}
-  setmetatable(StorageNodeGUI, {__index = BaseGUI})
+  setmetatable(StorageNodeGUI, {__index = BaseGui})
 
-  -- @See BaseGUI:OnShow
+  -- @See BaseGui:OnShow
   function StorageNodeGUI:OnShow(event)
     -- Get root
-    local root = game.players[event.player_index].gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
-
-    -- Has frame?
-    local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
-    if (frame ~= nil) then
-      -- Already open
+    local frame =
+      BaseGui.CreateFrame(
+      event.player_index,
+      SE.Constants.Names.Gui.StorageChestFrameRoot,
+      SE.Constants.Names.Gui.StorageChestFrame,
+      SE.Constants.Strings.Local.ChestSettings
+    )
+    -- Could new frame be created?
+    if (frame == nil) then
       return false
     end
-
-    -- Add the frame
-    frame =
-      root.add(
-      {
-        type = "frame",
-        name = SE.Constants.Names.Gui.StorageChestFrame,
-        caption = SE.Constants.Strings.Local.ChestSettings
-      }
-    )
-    frame.style.title_bottom_padding = 6
 
     -- Add read only checkbox
     frame.add(
@@ -45,17 +37,15 @@ return function(BaseGUI)
     return true
   end
 
-  -- @See BaseGUI:OnClose
+  -- @See BaseGui:OnClose
   function StorageNodeGUI:OnClose(playerIndex)
-    local player = game.players[playerIndex]
-    local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
-    local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
+    local frame = BaseGui.GetFrame(playerIndex, SE.Constants.Names.Gui.StorageChestFrameRoot, SE.Constants.Names.Gui.StorageChestFrame)
     if (frame ~= nil) then
       frame.destroy()
     end
   end
 
-  -- @See BaseGUI:OnPlayerChangedCheckboxElement
+  -- @See BaseGui:OnPlayerChangedCheckboxElement
   function StorageNodeGUI:OnPlayerChangedCheckboxElement(event)
     local chkBox = event.element
     -- Ensure the frame is present, and the correct box was clicked

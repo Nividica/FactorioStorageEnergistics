@@ -3,6 +3,7 @@ Version: 0.9.3
 Date: 04. 07. 2018
   Changes:
     - Increased storage chests base to match the steel chest. Increased high capacity chest to 4x that of the base chest.
+    - Minor performance increase while copy/pasting filters
 ---------------------------------------------------------------------------------------------------
 Version: 0.9.2
 Date: 04. 07. 2018

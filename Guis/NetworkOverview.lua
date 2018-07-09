@@ -4,12 +4,12 @@
 -- Description: Manages the global UI for storage networks.
 
 -- Constructs and returns the NetworkOverviewGUI
-return function(BaseGUI)
+return function(BaseGui)
   local NetworkOverviewGUI = {
     NeedsTicks = true,
     TicksBetweenUpdates = 60.0 * 5.0
   }
-  setmetatable(NetworkOverviewGUI, {__index = BaseGUI})
+  setmetatable(NetworkOverviewGUI, {__index = BaseGui})
 
   require "Utils/Strings"
   require "Utils/GUIHelper"
@@ -213,24 +213,21 @@ return function(BaseGUI)
     end
   end
 
-  -- NewFrame( LuaGuiElement ) :: FrameData
+  -- CreateFrame( uint ) :: FrameData
   -- FrameData
   -- - ItemTable :: LuaGuiElement
   -- - NetworkDropDown :: LuaGuiElement
   -- - Capacity :: LuaGuiElement
-  local function NewFrame(root)
+  local function CreateFrame(playerIndex)
     local width = 600
     local height = 450
 
-    -- Add the frame
-    local frame =
-      root.add(
-      {
-        type = "frame",
-        name = SE.Constants.Names.Gui.NetworkFrame,
-        caption = LocalStrings.StorageNetwork
-      }
-    )
+    -- Get root
+    local frame = BaseGui.CreateFrame(playerIndex, SE.Constants.Names.Gui.NetworkFrameRoot, SE.Constants.Names.Gui.NetworkFrame, LocalStrings.StorageNetwork)
+    -- Could new frame be created?
+    if (frame == nil) then
+      return nil
+    end
     frame.style.title_bottom_padding = 10
 
     -- Add the contents table
@@ -351,24 +348,20 @@ return function(BaseGUI)
       }
     )
 
+    -- Set as opened
+    local player = game.players[playerIndex]
+    player.opened = frame
+
     return {ItemTable = itemTable, NetworkDropDown = networkDropDown, Capacity = progBar}
   end
 
   -- @See BaseGui:OnShow
   function NetworkOverviewGUI:OnShow(event)
-    local player = game.players[event.player_index]
-
-    -- Get root
-    local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
-
-    -- Has frame?
-    if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
-      -- Already open, close first
-      NetworkOverviewGUI.OnClose(self, player.index)
-    end
-
     -- Build the frame
-    self.FrameData = NewFrame(root)
+    self.FrameData = CreateFrame(event.player_index)
+    if (self.FrameData == nil) then
+      return false
+    end
 
     -- Build dropdown list
     UpdateDropdownNetworks(self, event.tick)
@@ -376,18 +369,12 @@ return function(BaseGUI)
     -- Add tick info
     self.TickCount = 0
 
-    -- Set as opened
-    player.opened = root[SE.Constants.Names.Gui.NetworkFrame]
-
     return true
   end
 
   -- @See BaseGui:OnClose
   function NetworkOverviewGUI:OnClose(playerIndex)
-    local player = game.players[playerIndex]
-    local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
-    local frame = root[SE.Constants.Names.Gui.NetworkFrame]
-
+    local frame, player = BaseGui.GetFrame(playerIndex, SE.Constants.Names.Gui.NetworkFrameRoot, SE.Constants.Names.Gui.NetworkFrame)
     if (frame ~= nil) then
       -- Remove frame from player opened?
       if (player.opened == frame) then
@@ -403,7 +390,7 @@ return function(BaseGUI)
     LoadNetworkContents(self, event.tick)
   end
 
-  -- @See BaseGUI:OnPlayerClicked
+  -- @See BaseGui:OnPlayerClicked
   function NetworkOverviewGUI:OnPlayerClicked(event)
     local element = event.element
 

@@ -4,9 +4,9 @@
 -- Description:
 
 -- Constructs and returns the InterfaceNodeGUI object
-return function(BaseGUI)
+return function(BaseGui)
   local InterfaceNodeGUI = {}
-  setmetatable(InterfaceNodeGUI, {__index = BaseGUI})
+  setmetatable(InterfaceNodeGUI, {__index = BaseGui})
 
   require "Utils/GUIHelper"
 
@@ -145,7 +145,7 @@ return function(BaseGUI)
     UpdateSlotCount(guiData.Slots[guiData.SelectedIndex], amount)
   end
 
-  -- @See BaseGUI:OnShow
+  -- @See BaseGui:OnShow
   function InterfaceNodeGUI:OnShow(event)
     local SLOT_COUNT = 12
 
@@ -157,25 +157,17 @@ return function(BaseGUI)
     self.AmountTextfield = nil
 
     -- Get root
-    local root = game.players[event.player_index].gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
-
-    -- Has frame?
-    local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
-    if (frame ~= nil) then
-      -- Already open
+    local frame =
+      BaseGui.CreateFrame(
+      event.player_index,
+      SE.Constants.Names.Gui.InterfaceFrameRoot,
+      SE.Constants.Names.Gui.InterfaceFrame,
+      SE.Constants.Strings.Local.InterfaceSettings
+    )
+    -- Could new frame be created?
+    if (frame == nil) then
       return false
     end
-
-    -- Add the frame
-    frame =
-      root.add(
-      {
-        type = "frame",
-        name = SE.Constants.Names.Gui.InterfaceFrame,
-        caption = SE.Constants.Strings.Local.InterfaceSettings
-      }
-    )
-    frame.style.title_bottom_padding = 6
 
     -- Create the body
     local body =
@@ -262,17 +254,15 @@ return function(BaseGUI)
     return true
   end
 
-  -- @See BaseGUI:OnClose
+  -- @See BaseGui:OnClose
   function InterfaceNodeGUI:OnClose(playerIndex)
-    local player = game.players[playerIndex]
-    local root = player.gui[SE.Constants.Names.Gui.InterfaceFrameRoot]
-    local frame = root[SE.Constants.Names.Gui.InterfaceFrame]
+    local frame = BaseGui.GetFrame(playerIndex, SE.Constants.Names.Gui.InterfaceFrameRoot, SE.Constants.Names.Gui.InterfaceFrame)
     if (frame ~= nil) then
       frame.destroy()
     end
   end
 
-  -- @See BaseGUI:OnPlayerChangedSelectionElement
+  -- @See BaseGui:OnPlayerChangedSelectionElement
   function InterfaceNodeGUI:OnPlayerChangedSelectionElement(event)
     local dropdown = event.element
 
@@ -291,7 +281,7 @@ return function(BaseGUI)
     end
   end
 
-  -- @See BaseGUI:OnPlayerClicked
+  -- @See BaseGui:OnPlayerClicked
   function InterfaceNodeGUI:OnPlayerClicked(event)
     local element = event.element
 
@@ -320,7 +310,7 @@ return function(BaseGUI)
     end -- end Is elem button?
   end
 
-  -- @See BaseGUI:OnPlayerChangedText
+  -- @See BaseGui:OnPlayerChangedText
   function InterfaceNodeGUI:OnPlayerChangedText(event)
     local txtBox = event.element
 
@@ -361,7 +351,7 @@ return function(BaseGUI)
     SetFilterAmount(self, amount)
   end
 
-  -- @See BaseGUI:OnPlayerChangedSlider
+  -- @See BaseGui:OnPlayerChangedSlider
   function InterfaceNodeGUI:OnPlayerChangedSlider(event)
     local slider = event.element
 

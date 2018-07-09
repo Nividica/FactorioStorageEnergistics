@@ -472,6 +472,7 @@ return function()
 
     -- Is the network full?
     if (transfer.ReasonCode == TransferReasonCodes.NotAllTransfered) then
+      -- TODO: Alert manager + Don't spam alerts, use game ticks to set delimit
       for idx, player in pairs(game.players) do
         player.add_alert(requesterNode.Entity, defines.alert_type.no_storage)
       end
