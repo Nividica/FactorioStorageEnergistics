@@ -66,7 +66,7 @@ return function(BaseHandler)
   end
 
   -- @See BaseNode:OnTick
-  function EnergyAcceptorNodeHandler:OnTick()
+  function EnergyAcceptorNodeHandler:OnTick(tick)
     -- Tick!
     self.TicksTillUpdate = self.TicksTillUpdate - 1
 

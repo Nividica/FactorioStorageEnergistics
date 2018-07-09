@@ -9,9 +9,9 @@ return function(BaseGUI)
   setmetatable(StorageNodeGUI, {__index = BaseGUI})
 
   -- @See BaseGUI:OnShow
-  function StorageNodeGUI:OnShow(player)
+  function StorageNodeGUI:OnShow(event)
     -- Get root
-    local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
+    local root = game.players[event.player_index].gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
 
     -- Has frame?
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
@@ -46,7 +46,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnClose
-  function StorageNodeGUI:OnClose(player)
+  function StorageNodeGUI:OnClose(playerIndex)
+    local player = game.players[playerIndex]
     local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
     local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
     if (frame ~= nil) then
@@ -55,12 +56,11 @@ return function(BaseGUI)
   end
 
   -- @See BaseGUI:OnPlayerChangedCheckboxElement
-  function StorageNodeGUI:OnPlayerChangedCheckboxElement(player, element)
-    local root = player.gui[SE.Constants.Names.Gui.StorageChestFrameRoot]
-    local frame = root[SE.Constants.Names.Gui.StorageChestFrame]
+  function StorageNodeGUI:OnPlayerChangedCheckboxElement(event)
+    local chkBox = event.element
     -- Ensure the frame is present, and the correct box was clicked
-    if (frame ~= nil and element.name == SE.Constants.Names.Gui.StorageChestReadOnlyCheckbox) then
-      if (element.state) then
+    if (chkBox.name == SE.Constants.Names.Gui.StorageChestReadOnlyCheckbox) then
+      if (chkBox.state) then
         self.Node.ReadOnlyMode = true
       else
         -- Why nil? Micro-optimization.

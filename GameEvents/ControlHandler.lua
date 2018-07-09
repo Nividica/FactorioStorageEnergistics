@@ -10,14 +10,13 @@ return function()
   -- OnShowStorageNetworkGUI( Event ) :: void
   -- Called when the key bound to show network overview is pressed
   function ControlHandler.OnShowStorageNetworkGUI(event)
-    -- Get the plaery
-    local player = game.players[event.player_index]
+    local playerIndex = event.player_index
 
     -- Toggle show/close
-    if (SE.GuiManager.IsGuiOpen(player, SE.GuiManager.Guis.NetworkOverview)) then
-      SE.GuiManager.CloseGui(player, SE.GuiManager.Guis.NetworkOverview)
+    if (SE.GuiManager.IsGuiOpen(playerIndex, SE.GuiManager.Guis.NetworkOverview)) then
+      SE.GuiManager.CloseGui(playerIndex)
     else
-      SE.GuiManager.ShowGui(player, SE.GuiManager.Guis.NetworkOverview, {})
+      SE.GuiManager.ShowGui(event, SE.GuiManager.Guis.NetworkOverview)
     end
   end
 

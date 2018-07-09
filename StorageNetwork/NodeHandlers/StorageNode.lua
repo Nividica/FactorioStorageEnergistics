@@ -16,9 +16,9 @@ return function(BaseHandler)
     return node.Entity.name == SE.Constants.Names.Proto.RequesterChest.Entity
   end
 
-  -- @See BaseNode:OnPlayerOpenedNode
+  -- @See BaseNode:OnGetGuiHandler
   -- Show the gui
-  function StorageNodeHandler:OnPlayerOpenedNode(player)
+  function StorageNodeHandler:OnGetGuiHandler(playerIndex)
     if (not ForceReadOnly(self)) then
       return SE.GuiManager.Guis.StorageNode
     end

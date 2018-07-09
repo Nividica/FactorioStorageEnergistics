@@ -150,8 +150,8 @@ return function(BaseHandler)
     end -- end for(toAdd)
   end
 
-  -- @See BaseNode:OnPlayerOpenedNode
-  function InterfaceNodeHandler:OnPlayerOpenedNode(player)
+  -- @See BaseNode:OnGetGuiHandler
+  function InterfaceNodeHandler:OnGetGuiHandler(playerIndex)
     return SE.GuiManager.Guis.InterfaceNode
   end
 

@@ -147,14 +147,14 @@ return function(BaseGUI)
     end
   end
 
-  -- LoadNetworkContents( Table ) :: void
+  -- LoadNetworkContents( Table, uint ) :: void
   -- Adds the contents of the network to the frame
-  local function LoadNetworkContents(guiData)
+  local function LoadNetworkContents(guiData, tick)
     -- Get the network
     local network = SE.Networks.GetNetwork(guiData.NetworkIDs[guiData.FrameData.NetworkDropDown.selected_index])
 
     -- Query the network for the items
-    local networkContents = SE.NetworkHandler.GetStorageContents(network)
+    local networkContents = SE.NetworkHandler.GetStorageContents(network, tick)
 
     -- Extract capacity amounts
     local totalSlots = networkContents[SE.Constants.Strings.TotalSlots]
@@ -175,9 +175,9 @@ return function(BaseGUI)
     DisplayItems(guiData, networkContents)
   end
 
-  -- UpdateDropdownNetworks( Table )
+  -- UpdateDropdownNetworks( Table, uint ) :: void
   -- Sets the networks in the dropdown
-  local function UpdateDropdownNetworks(guiData)
+  local function UpdateDropdownNetworks(guiData, tick)
     -- Get network ids
     guiData.NetworkIDs = SE.Networks.GetNetworkIDs()
 
@@ -198,7 +198,7 @@ return function(BaseGUI)
           table.remove(guiData.NetworkIDs, idx)
         else
           -- Add to the dropdown list
-          ddList[#ddList + 1] = ConcatStringWithLocalized(LocalStrings.NetworkID, "# " .. tostring(networkID))
+          table.insert(ddList, 1, ConcatStringWithLocalized(LocalStrings.NetworkID, "# " .. tostring(networkID)))
         end
 
         -- Decrement index
@@ -209,7 +209,7 @@ return function(BaseGUI)
       guiData.FrameData.NetworkDropDown.selected_index = 1
 
       -- Load the first network
-      LoadNetworkContents(guiData)
+      LoadNetworkContents(guiData, tick)
     end
   end
 
@@ -355,12 +355,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnShow
-  function NetworkOverviewGUI:OnShow(player)
-    -- Does the player have something else opened?
-    if (player.opened ~= nil) then
-      -- Player has something else open, don't show overview
-      return false
-    end
+  function NetworkOverviewGUI:OnShow(event)
+    local player = game.players[event.player_index]
 
     -- Get root
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
@@ -368,14 +364,14 @@ return function(BaseGUI)
     -- Has frame?
     if (root[SE.Constants.Names.Gui.NetworkFrame] ~= nil) then
       -- Already open, close first
-      NetworkOverviewGUI.OnClose(self, player)
+      NetworkOverviewGUI.OnClose(self, player.index)
     end
 
     -- Build the frame
     self.FrameData = NewFrame(root)
 
     -- Build dropdown list
-    UpdateDropdownNetworks(self)
+    UpdateDropdownNetworks(self, event.tick)
 
     -- Add tick info
     self.TickCount = 0
@@ -387,7 +383,8 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnClose
-  function NetworkOverviewGUI:OnClose(player)
+  function NetworkOverviewGUI:OnClose(playerIndex)
+    local player = game.players[playerIndex]
     local root = player.gui[SE.Constants.Names.Gui.NetworkFrameRoot]
     local frame = root[SE.Constants.Names.Gui.NetworkFrame]
 
@@ -402,31 +399,23 @@ return function(BaseGUI)
   end
 
   -- @See BaseGui:OnPlayerChangedDropDown
-  function NetworkOverviewGUI:OnPlayerChangedDropDown(player, element)
-    LoadNetworkContents(self, self.NetworkIDs[element.selected_index])
+  function NetworkOverviewGUI:OnPlayerChangedDropDown(event)
+    LoadNetworkContents(self, event.tick)
   end
 
   -- @See BaseGUI:OnPlayerClicked
-  function NetworkOverviewGUI:OnPlayerClicked(player, event)
+  function NetworkOverviewGUI:OnPlayerClicked(event)
     local element = event.element
 
     if (element ~= nil and element.name == "se_network_overview_close") then
-      SE.GuiManager.CloseGui(player, NetworkOverviewGUI)
+      SE.GuiManager.CloseGui(event.player_index)
     end
   end
 
   -- @See BaseGui:OnTick
-  function NetworkOverviewGUI:OnTick(player)
+  function NetworkOverviewGUI:OnTick(player_index, tick)
     if (self == nil or self.TickCount == nil) then
-      -- Invalid data, close the gui
-      NetworkOverviewGUI.OnClose(nil, player)
-      return false
-    end
-
-    -- Player does not have frame open?
-    if (player.opened ~= player.gui[SE.Constants.Names.Gui.NetworkFrameRoot][SE.Constants.Names.Gui.NetworkFrame]) then
-      -- Player no longer has frame open, close and cleanup
-      NetworkOverviewGUI.OnClose(self, player)
+      -- Invalid data
       return false
     end
 
@@ -439,7 +428,9 @@ return function(BaseGUI)
     end
     self.TickCount = 0
 
-    LoadNetworkContents(self)
+    if (#self.NetworkIDs > 0) then
+      LoadNetworkContents(self, tick)
+    end
 
     return true
   end

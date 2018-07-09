@@ -11,70 +11,66 @@ return function()
     NeedsTicks = false
   }
 
-  -- OnShow( Self, LuaPlayer ) :: bool
+  -- OnShow( Self, Event ) :: bool
   -- Shows the GUI.
-  -- Player: Required
+  -- playerIndex
   -- Self: is a table that contains data used by a specific gui. Data is retained
   -- accross all events, and can be used to store state information. However
   -- it is not retained across a save-load.
   -- If called due to an entity with a node being clicked on, will contain the node and handler.
   -- Returns: true if the GUI is shown, false if it is not
-  function BaseGUI:OnShow(player)
+  function BaseGUI:OnShow(event)
     return false
   end
 
-  -- OnClose( Self, LuaPlayer ) :: void
+  -- OnClose( Self, uint ) :: void
   -- Closes the GUI.
-  -- Player: Required
+  -- playerIndex
   -- Self: Gui data. @See BaseGUI:OnShow for more details.
-  -- It must be acceptable that Self may be nil, and the GUI must still close.
-  function BaseGUI:OnClose(player)
+  -- Note: It must be acceptable that Self may be nil, and the GUI must still close!
+  function BaseGUI:OnClose(playerIndex)
   end
 
-  -- OnTick( Self, LuaPlayer ) :: bool
+  -- OnTick( Self, uint, uint ) :: bool
   -- Called if NeedsTicks is true, every game tick
-  -- Player: Required
   -- Self: Gui data. @See BaseGUI:OnShow for more details.
   -- Returns: True to keep gui open, return false to close it
-  function BaseGUI:OnTick(player)
-    if (self ~= nil and self.NeedsTicks) then
-      player.print("Unhandled GUI tick")
-    end
+  function BaseGUI:OnTick(playerIndex, tick)
     return false
   end
 
-  -- OnPlayerChangedSelectionElement( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerChangedSelectionElement( Self, Event ) :: void
   -- Called when the player has changed a selection element for this node.
   -- Self: Gui data. @See BaseGUI:OnShow for more details.
-  function BaseGUI:OnPlayerChangedSelectionElement(player, element)
+  function BaseGUI:OnPlayerChangedSelectionElement(event)
   end
 
-  -- OnPlayerChangedCheckboxElement( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerChangedCheckboxElement( Self, Event ) :: void
   -- Called when the player clicks a checkbox in the nodes GUI.
   -- Self: Gui data. @See BaseGUI:OnShow for more details.
-  function BaseGUI:OnPlayerChangedCheckboxElement(player, element)
+  function BaseGUI:OnPlayerChangedCheckboxElement(event)
   end
 
-  -- OnPlayerChangedDropDown( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerChangedDropDown( Self, Event ) :: void
   -- Called when the player changes a dropdown.
   -- Self: Gui data. @See BaseGUI:OnShow for more details.
-  function BaseGUI:OnPlayerChangedDropDown(player, element)
+  function BaseGUI:OnPlayerChangedDropDown(event)
   end
 
-  -- OnPlayerClicked( Self, LuaPlayer, Event ) :: void
+  -- OnPlayerClicked( Self, Event ) :: void
   -- Called when the player clicks something.
   -- Self: Gui data. @See GuiManager::OnElementClicked for more details.
-  function BaseGUI:OnPlayerClicked(player, event)
+  function BaseGUI:OnPlayerClicked(event)
   end
 
-  -- OnPlayerChangedText( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerChangedText( Self, Event ) :: void
   -- Called when the player types in a text element
-  function BaseGUI:OnPlayerChangedText(player, element)
+  function BaseGUI:OnPlayerChangedText(event)
   end
 
-  -- OnPlayerChangedSlider( Self, LuaPlayer, LuaGuiElement ) :: void
+  -- OnPlayerChangedSlider( Self, Event ) :: void
   -- Called when the player moves a slider
-  function BaseGUI:OnPlayerChangedSlider(player, element)
+  function BaseGUI:OnPlayerChangedSlider(event)
   end
 
   return BaseGUI

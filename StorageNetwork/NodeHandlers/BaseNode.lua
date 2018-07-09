@@ -93,7 +93,7 @@ return function()
 
   -- void OnTick(self)
   -- Called when the game ticks, if NeedsTicks is true.
-  function BaseNodeHandler:OnTick()
+  function BaseNodeHandler:OnTick(tick)
   end
 
   -- OnNetworkTick( Self, Network ) :: void
@@ -112,19 +112,12 @@ return function()
   function BaseNodeHandler:OnLeaveNetwork(network)
   end
 
-  -- OnPlayerOpenedNode( Self, LuaPlayer) :: GuiHandler
+  -- OnGetGuiHandler( Self, uint) :: GuiHandler
   -- Called when a player has opened this node
   -- This will only be called if the entity this node represents does something when it is clicked.
   -- Return a GUI handler to show that GUI
-  function BaseNodeHandler:OnPlayerOpenedNode(player)
-    --player.print("Node opened by " .. player.name)
+  function BaseNodeHandler:OnGetGuiHandler(playerIndex)
     return nil
-  end
-
-  -- OnPlayerClosedNode( Self, LuaPlayer ) :: void
-  -- Called when this node was opened by a player, but the player has just closed it.
-  function BaseNodeHandler:OnPlayerClosedNode(player)
-    --player.print("Node closed by " .. player.name)
   end
 
   -- OnPasteSettings( Self, LuaEntity, LuaPlayer ) :: void

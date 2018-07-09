@@ -19,7 +19,8 @@ return function()
     GameEventManager.Control.RegisterWithGame()
     SE.GuiManager.RegisterWithGame()
     script.on_event(defines.events.on_tick, GameEventManager.OnFirstTick)
-    script.on_event(defines.events.on_player_joined_game, GameEventManager.OnPlayerJoined)
+    script.on_event(defines.events.on_player_joined_game, SE.GuiManager.OnPlayerJoinedGame)
+    script.on_event(defines.events.on_runtime_mod_setting_changed, SE.Settings.LoadSettings)
   end
 
   -- OnFirstTick( Event ) :: void
@@ -38,19 +39,18 @@ return function()
   -- OnTick( Event ) :: void
   -- Called every game tick.
   function GameEventManager.OnTick(event)
-    SE.Networks.Tick()
-    SE.GuiManager.Tick()
-    SE.Logger.Tick()
+    SE.Networks.Tick(event)
+    SE.GuiManager.Tick(event.tick)
+    --SE.Logger.Tick()
   end
 
-  -- OnPlayerJoined( Event ) :: void
-  -- Called when a player joins the game
-  -- Event fields:
-  -- - player_index :: uint
-  function GameEventManager.OnPlayerJoined(event)
-    local player = game.players[event.player_index]
-    SE.GuiManager.OnPlayerJoinedGame(player)
-  end
+  -- -- OnPlayerJoined( Event ) :: void
+  -- -- Called when a player joins the game
+  -- -- Event fields:
+  -- -- - player_index :: uint
+  -- function GameEventManager.OnPlayerJoined(event)
+  --   SE.GuiManager.OnPlayerJoinedGame(event)
+  -- end
 
   return GameEventManager
 end
