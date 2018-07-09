@@ -80,8 +80,8 @@ return function(BaseHandler)
     catalog[SE.Constants.Strings.FreeSlots] = (catalog[SE.Constants.Strings.FreeSlots] or 0) + freeSlots
   end
 
-  -- OnPasteSettings( Self,  LuaEntity, LuaPlayer ) :: void
-  function StorageNodeHandler:OnPasteSettings(sourceEntity, player)
+  -- @See BaseNode:OnPasteSettings
+  function StorageNodeHandler:OnPasteSettings(sourceEntity, playerIndex)
     -- Is this node forced read-only?
     if (ForceReadOnly(self)) then
       return

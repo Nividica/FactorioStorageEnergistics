@@ -120,10 +120,9 @@ return function()
     return nil
   end
 
-  -- OnPasteSettings( Self, LuaEntity, LuaPlayer ) :: void
+  -- OnPasteSettings( Self, LuaEntity, uint ) :: void
   -- Called when pasting the settings of another entity
-  function BaseNodeHandler:OnPasteSettings(sourceEntity, player)
-    --player.print("Would get settings from entity " .. sourceEntity.name)
+  function BaseNodeHandler:OnPasteSettings(sourceEntity, playerIndex)
   end
 
   -- OnDestroy( Self ) :: void

@@ -156,7 +156,7 @@ return function(BaseHandler)
   end
 
   -- @See BaseNode:OnPasteSettings
-  function InterfaceNodeHandler:OnPasteSettings(sourceEntity, player)
+  function InterfaceNodeHandler:OnPasteSettings(sourceEntity, playerIndex)
     local otherNode = SE.Networks.GetNodeForEntity(sourceEntity)
     if (otherNode) then
       -- Network node

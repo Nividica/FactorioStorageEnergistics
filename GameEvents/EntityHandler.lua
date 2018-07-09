@@ -118,7 +118,7 @@ return function()
     if (handler ~= nil) then
       local destNode = SE.Networks.GetNodeForEntity(destEntity)
       if (destNode ~= nil) then
-        handler.OnPasteSettings(destNode, event.source, game.players[event.player_index])
+        handler.OnPasteSettings(destNode, event.source, event.player_index)
       end
     end
   end
