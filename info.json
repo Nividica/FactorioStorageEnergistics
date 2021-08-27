@@ -1,13 +1,11 @@
 {
-  "name": "storage_energistics",
-  "version": "0.9.3",
-  "title": "Storage Energistics",
-  "author": "Nividica",
-  "contact": "Nividica@gmail.com",
-  "description": "Digitally transfer items via the circuit network!",
-  "homepage": "https://forums.factorio.com/viewtopic.php?f=190&t=61160",
-  "factorio_version": "0.16",
-  "dependencies": [
-    "base >= 0.16.0"
-  ]
+    "name": "storage_energistics",
+    "version": "1.0.0",
+    "title": "Storage Energistics",
+    "author": "Pouka",
+    "contact": "Pouka",
+    "homepage": "",
+    "factorio_version": "1.1",
+    "dependencies": ["base >= 1.1.38"],
+    "description": "This mod makes it possible to transit objects via the logistics network, against energy."
 }
